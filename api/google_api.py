@@ -16,7 +16,7 @@ def GoogleApi (temas):
 
     googlenews = GoogleNews(start=previusDate ,end=actualDate)
     # goooglenews = GoogleNews(period='d')
-    googlenews.set_lang('pt')
+    googlenews.set_lang('en')
     googlenews.search(temas)
 
     result = googlenews.result()

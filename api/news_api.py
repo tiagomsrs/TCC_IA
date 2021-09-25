@@ -166,10 +166,12 @@ def NewsApi (tema):
 
     ######### melhorar as buscas e evitar o estouro
 
+    to = utils.datetime.today()
+    to = str(to).split(' ')[0]
+    data = newsapi.get_everything(q=tema[0], from_param=utils.dateFormatNewsApi(), to=to, sort_by='publishedAt', page_size=20)
 
-    data = newsapi.get_everything(q=tema[0], from_param=utils.dateFormatNewsApi())
     # data = newsapi.get_everything(q=tema[0], from_param='2021-08-20')
     # print(data['totalResults'])
-
+    #%Y-%m-%d
     return data
 
