@@ -3,7 +3,7 @@ import pandas as pd
 from utils import utils
 
 
-def GoogleApi (temas):
+def GoogleApi (temas, lang):
     '''
     Optional choose custom day range (mm/dd/yyyy)
 
@@ -14,7 +14,7 @@ def GoogleApi (temas):
 
     [actualDate, previusDate] = utils.dateFormatGoogleApi()
 
-    googlenews = GoogleNews(start=previusDate ,end=actualDate)
+    googlenews = GoogleNews(lang=lang, start=previusDate ,end=actualDate)
     # goooglenews = GoogleNews(period='d')
     googlenews.set_lang('en')
     googlenews.search(temas)

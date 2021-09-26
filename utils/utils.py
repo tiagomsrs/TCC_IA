@@ -1,6 +1,22 @@
-from datetime import date, datetime, time
 import re
+import pandas as pd
+import wget
+import os
+import nltk
+from nltk.corpus import opinion_lexicon
+import string
+
+from zipfile import ZipFile
 from newspaper import Article
+from datetime import date, datetime, time
+from bs4 import BeautifulSoup
+from unidecode import unidecode
+from nltk.corpus import stopwords
+from nltk.tokenize import treebank
+
+nltk.download('opinion_lexicon')
+stopwords = stopwords.words('english')
+tokenizer = treebank.TreebankWordTokenizer()
 
 def dateFormatGoogleApi ():
     """
@@ -142,20 +158,35 @@ def summaryDownload(matrix):
 
     for row in range(len(matrix)):
 
-        try:
-            url = matrix[row][2]
-            article = Article(url)
-            article.download()
-        except (RuntimeError, TypeError, NameError):
-            print("Failed to download the content of url: " + url)
+        url = matrix[row][2]
+        article = Article(url)
 
         try:
+            article.download()
             article.parse()
             article.nlp()
             content = article.summary
-        except (RuntimeError, TypeError, NameError):
-            print("Failed to parse the file!")
 
-        completeMatrix.append([matrix[row][:], content])
+            if content :
+                completeMatrix.append([matrix[row][:], content])
+
+        except:
+            print("Failed to download the content of url." + url)
+
+
 
     return completeMatrix[:]
+
+
+def sentimentalAnalyzes(matrix):
+    """
+    :param matrix in the form of:
+        [0[0] - title
+          [1] - date
+          [2] - link
+        [1] - summary
+    :return: lexical analyzes eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust)
+                and two sentiments (negative and positive).
+    """
+
+    return None
