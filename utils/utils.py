@@ -3,8 +3,15 @@ import pandas as pd
 import wget
 import os
 import nltk
+nltk.download('punkt')
+from zipfile import ZipFile
+
+nltk.download('opinion_lexicon')
+nltk.download('stopwords')
+
 from nltk.corpus import opinion_lexicon
 import string
+import matplotlib.pyplot as plt
 
 from zipfile import ZipFile
 from newspaper import Article
@@ -13,10 +20,25 @@ from bs4 import BeautifulSoup
 from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.tokenize import treebank
+from wordcloud import WordCloud
 
-nltk.download('opinion_lexicon')
-stopwords = stopwords.words('english')
+stopwordsEnglish = stopwords.words('english')
+stopwordsPortuguese = stopwords.words('portuguese')
+
 tokenizer = treebank.TreebankWordTokenizer()
+
+
+
+file = 'NRC-Emotion-Lexicon-Wordlevel-v0.92.txt'
+
+# lexicon = pd.read_csv(file, names=['palavra', 'sentimento', 'pertence'], sep='\t')
+# print(lexicon.sentimento.unique())
+# print(lexicon.palavra.unique().shape)
+# print(lexicon[lexicon.pertence == 1].sentimento.value_counts())
+# lexicon[lexicon.pertence == 1].sentimento.value_counts().plot(kind = 'bar')
+# print(lexicon[(lexicon.pertence == 1) & (lexicon.sentimento == 'positive')].head(-10))
+#
+# print('a')
 
 def dateFormatGoogleApi ():
     """
@@ -156,6 +178,8 @@ def summaryDownload(matrix):
     URL = 3
     completeMatrix = []
 
+    print("Arrive {0} news to download. ".format(len(matrix)))
+
     for row in range(len(matrix)):
 
         url = matrix[row][2]
@@ -170,17 +194,42 @@ def summaryDownload(matrix):
             if content :
                 completeMatrix.append([matrix[row][:], content])
 
-        except:
-            print("Failed to download the content of url." + url)
+        except Exception as e:
+            print("Failed to download the content of url: " + url)
+            print(e)
 
-
-
+    print("It was possible to download {0} news .".format(len(completeMatrix)))
     return completeMatrix[:]
 
+def clean_html(text):
+    soup = BeautifulSoup(text, 'html')
+    for s in soup(['script', 'style']):
+        s.decompose()
 
-def sentimentalAnalyzes(matrix):
+    return "".join(soup.stripped_strings)
+
+def remove_punctuation(text):
+    text = [word for word in text if word not in string.punctuation]
+    text = ''.join(text)
+
+    return text
+
+def remove_stopwords(text, language):
+    # TODO : tentar achar alguma maneira de detectar a linguagem que está o texto para evitar problema de stopword errado
+
+    text = unidecode(text)
+
+    if language == 'pt':
+        text = [word.lower() for word in text.split() if word.lower() not in stopwordsPortuguese]
+    elif language == 'en':
+        text = [word.lower() for word in text.split() if word.lower() not in stopwordsEnglish]
+
+    return " ".join(text)
+
+def sentimentalAnalyzes(matrix, language):
     """
-    :param matrix in the form of:
+    :param language: language used on entire project
+    :param matrix: in the form of:
         [0[0] - title
           [1] - date
           [2] - link
@@ -188,5 +237,56 @@ def sentimentalAnalyzes(matrix):
     :return: lexical analyzes eight basic emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust)
                 and two sentiments (negative and positive).
     """
+    SUMMARY = 1
+
+    for row in range(len(matrix)):
+        matrix[row][SUMMARY] = clean_html(matrix[row][SUMMARY])
+        matrix[row][SUMMARY] = remove_punctuation(matrix[row][SUMMARY])
+        matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
+        matrix[row][SUMMARY] = matrix[row][SUMMARY].lower()
+
+
+    plotWordCloud(matrix, language)
+
+    pos_list = set(opinion_lexicon.positive())
+    neg_list = set(opinion_lexicon.negative())
+
+    dataset['sentiment_clean'] = dataset['clean_text'].apply(sentiment, args=(pos_list, neg_list))
+
+    # nrc_pos = set(pivot_lexicon[pivot_lexicon.positive == 1].palavra)
+    # nrc_neg = set(pivot_lexicon[pivot_lexicon.negative == 1].palavra)
+    # dataset['sentiment_clean_nrc'] = dataset['clean_text'].apply(sentiment, args=(nrc_pos, nrc_neg))
+
 
     return None
+
+
+def sentimentCount(sentence, pos_list, neg_list):
+    sent = 0
+    words = [word for word in tokenizer.tokenize(sentence)]
+
+    for word in words:
+        if word in pos_list:
+            sent += 1
+        elif word in neg_list:
+            sent -= 1
+
+    return sent
+
+def plotWordCloud(matrix, language):
+    SUMMARY = 1
+
+    if language == 'pt':
+        wc = WordCloud(width=800, height=400, max_words=200, stopwords=stopwordsPortuguese)
+    elif language == 'en':
+        wc = WordCloud(width=800, height=400, max_words=200, stopwords=stopwordsEnglish)
+
+    corpus = ""
+    for row in range(len(matrix)):
+        corpus += " " + matrix[row][SUMMARY]
+
+    wc.generate(corpus)
+    plt.figure(figsize=(10, 20))
+    plt.imshow(wc)
+    plt.axis('off')
+    plt.show()

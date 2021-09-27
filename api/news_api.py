@@ -138,7 +138,7 @@ def wordcld(dictionary):
             print("Wordcloud Not applicable")
 
 
-def NewsApi (tema, language):
+def NewsApi (tema, language, page_size):
 
     api_key = 'a7503f924ba94bf8874a440cc9d74fcb'
     newsapi = NewsApiClient(api_key=api_key)

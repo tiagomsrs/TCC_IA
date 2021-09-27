@@ -1,17 +1,15 @@
 from api import google_api
 from api import news_api
 from utils import utils
-import nltk
 import webbrowser
-
-
+import nltk
 
 
 
 if __name__ == "__main__":
-
-    # nltk.download('punkt')
     language = 'en'
+    page_size = 20
+
     print('Entre com a quantidade de temas: ')
     countTema = int(input())
     temas = list()
@@ -22,30 +20,31 @@ if __name__ == "__main__":
 
     try:
         googleOutput = google_api.GoogleApi(temas[0], language)
-    except (RuntimeError, TypeError, NameError):
+        news_1 = utils.extractorGoogleApi(googleOutput)
+    except:
         print("Failed to get the news from Google Api")
-    finally:
-        news_1 = utils.extractorGoogleApi (googleOutput)
 
     try:
-        newsOutput = news_api.NewsApi(temas, language)['articles']
-    except (RuntimeError, TypeError, NameError):
-        print("Failed to get the news from News Api")
-    finally:
+        newsOutput = news_api.NewsApi(temas, language, page_size)['articles']
         news_2 = utils.extractorNewsApi(newsOutput)
+    except:
+        print("Failed to get the news from News Api")
 
 
-    newsMatrix = utils.youtubeRemoval(news_1 + news_2)
-    completeMatrix = utils.summaryDownload(newsMatrix)
+    if news_1 and news_2:
 
-    utils.sentimentalAnalyzes(completeMatrix.copy())
+        newsMatrix = utils.youtubeRemoval(news_1 + news_2)
+        completeMatrix = utils.summaryDownload(newsMatrix)
 
-    chrome_path = '/usr/bin/google-chrome %s'
+        completeMatrix = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
 
-    for index in range(0, len(completeMatrix), 3):
-        webbrowser.get(chrome_path).open(completeMatrix[index][0][2])
+        print('a')
+        # chrome_path = '/usr/bin/google-chrome %s'
+        #
+        # for index in range(0, len(completeMatrix), 3):
+        #     webbrowser.get(chrome_path).open(completeMatrix[index][0][2])
 
-    # with open('test.txt', 'w') as f:
-    #     f.write(str(completeMatrix))
-    # f.close()
+        # with open('test.txt', 'w') as f:
+        #     f.write(str(completeMatrix))
+        # f.close()
 
