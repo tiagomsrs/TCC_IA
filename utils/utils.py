@@ -252,7 +252,7 @@ def sentimentalAnalyzes(matrix, language):
     neg_list = set(opinion_lexicon.negative())
 
     dataset['sentiment_clean'] = dataset['clean_text'].apply(sentiment, args=(pos_list, neg_list))
-
+    # TODO : categorizar agora as noticias
     # nrc_pos = set(pivot_lexicon[pivot_lexicon.positive == 1].palavra)
     # nrc_neg = set(pivot_lexicon[pivot_lexicon.negative == 1].palavra)
     # dataset['sentiment_clean_nrc'] = dataset['clean_text'].apply(sentiment, args=(nrc_pos, nrc_neg))
