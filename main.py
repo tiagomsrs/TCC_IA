@@ -1,6 +1,7 @@
 from api import google_api
 from api import news_api
 from utils import utils
+import time
 import webbrowser
 import nltk
 
@@ -11,12 +12,16 @@ if __name__ == "__main__":
     page_size = 20
 
     print('Entre com a quantidade de temas: ')
-    countTema = int(input())
+    # countTema = int(input())
     temas = list()
+    #
+    # while (countTema > 0):
+    #     temas.append(str(input()))
+    #     countTema -= 1
 
-    while (countTema > 0):
-        temas.append(str(input()))
-        countTema -= 1
+    temas.append("brazil")
+
+    inicio = time.time()
 
     try:
         googleOutput = google_api.GoogleApi(temas[0], language)
@@ -30,15 +35,26 @@ if __name__ == "__main__":
     except:
         print("Failed to get the news from News Api")
 
+    fim = time.time()
+    print("Time spend to search Google e News API:" + str(fim - inicio))
+
 
     if news_1 and news_2:
 
         newsMatrix = utils.youtubeRemoval(news_1 + news_2)
+
+        inicio = time.time()
         completeMatrix = utils.summaryDownload(newsMatrix)
+        fim = time.time()
+        print("Time spend to download the news summary: " + str(fim - inicio))
 
+        inicio = time.time()
         completeMatrix = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
+        fim = time.time()
 
-        print('a')
+        print("Time spend to format the news: " + str(fim - inicio))
+
+
         # chrome_path = '/usr/bin/google-chrome %s'
         #
         # for index in range(0, len(completeMatrix), 3):

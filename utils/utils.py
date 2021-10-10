@@ -1,4 +1,5 @@
 import re
+import _thread
 import pandas as pd
 import wget
 import os
@@ -14,13 +15,15 @@ import string
 import matplotlib.pyplot as plt
 
 from zipfile import ZipFile
+import time
 from newspaper import Article
-from datetime import date, datetime, time
+from datetime import date, datetime
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
+import concurrent.futures
 
 stopwordsEnglish = stopwords.words('english')
 stopwordsPortuguese = stopwords.words('portuguese')
@@ -169,16 +172,15 @@ def youtubeRemoval(matrix):
 
     return outputMatrix[:]
 
-def summaryDownload(matrix):
+def summaryDownload_backup(matrix):
     """
-
     :param matrix: Complete matrix to donwload the content
     :return:
     """
-    URL = 3
     completeMatrix = []
 
     print("Arrive {0} news to download. ".format(len(matrix)))
+
 
     for row in range(len(matrix)):
 
@@ -198,11 +200,55 @@ def summaryDownload(matrix):
             print("Failed to download the content of url: " + url)
             print(e)
 
+
     print("It was possible to download {0} news .".format(len(completeMatrix)))
     return completeMatrix[:]
 
+def summaryDownload(matrix):
+    """
+    :param matrix: Complete matrix to download the content
+    :return:
+    """
+    completeMatrix = []
+    print("Arrive {} news to download. ".format(len(matrix)))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+
+        future_to_url = {executor.submit(summary_download, matrix, completeMatrix, row): row for row in range(len(matrix))}
+        for future in concurrent.futures.as_completed(future_to_url):
+            url = future_to_url[future]
+        try:
+            data = future.result()
+        except Exception as exc:
+            print("Failed to download the summary")
+
+
+    print("It was possible to download {0} news .".format(len(completeMatrix)))
+    return completeMatrix[:]
+
+
+def summary_download(matrix, completeMatrix, row):
+
+    url = matrix[row][2]
+    article = Article(url)
+    try:
+        article.download()
+
+        article.parse()
+        article.nlp()
+        content = article.summary
+
+        if content:
+            completeMatrix.append([matrix[row][:], content])
+            return completeMatrix
+
+    except Exception as e:
+        print("Failed to download the content of url: " + url)
+        print(e)
+
+
 def clean_html(text):
-    soup = BeautifulSoup(text, 'html')
+    soup = BeautifulSoup(text, "html")
     for s in soup(['script', 'style']):
         s.decompose()
 
@@ -248,10 +294,10 @@ def sentimentalAnalyzes(matrix, language):
 
     plotWordCloud(matrix, language)
 
-    pos_list = set(opinion_lexicon.positive())
-    neg_list = set(opinion_lexicon.negative())
+    # pos_list = set(opinion_lexicon.positive())
+    # neg_list = set(opinion_lexicon.negative())
 
-    dataset['sentiment_clean'] = dataset['clean_text'].apply(sentiment, args=(pos_list, neg_list))
+   # dataset['sentiment_clean'] = dataset['clean_text'].apply(sentiment, args=(pos_list, neg_list))
     # TODO : categorizar agora as noticias
     # nrc_pos = set(pivot_lexicon[pivot_lexicon.positive == 1].palavra)
     # nrc_neg = set(pivot_lexicon[pivot_lexicon.negative == 1].palavra)
