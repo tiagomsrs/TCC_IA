@@ -1,9 +1,11 @@
+import webbrowser
+import nltk
+
 from api import google_api
 from api import news_api
 from utils import utils
 import time
-import webbrowser
-import nltk
+
 
 
 
