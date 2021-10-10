@@ -172,37 +172,6 @@ def youtubeRemoval(matrix):
 
     return outputMatrix[:]
 
-def summaryDownload_backup(matrix):
-    """
-    :param matrix: Complete matrix to donwload the content
-    :return:
-    """
-    completeMatrix = []
-
-    print("Arrive {0} news to download. ".format(len(matrix)))
-
-
-    for row in range(len(matrix)):
-
-        url = matrix[row][2]
-        article = Article(url)
-
-        try:
-            article.download()
-            article.parse()
-            article.nlp()
-            content = article.summary
-
-            if content :
-                completeMatrix.append([matrix[row][:], content])
-
-        except Exception as e:
-            print("Failed to download the content of url: " + url)
-            print(e)
-
-
-    print("It was possible to download {0} news .".format(len(completeMatrix)))
-    return completeMatrix[:]
 
 def summaryDownload(matrix):
     """
@@ -212,9 +181,9 @@ def summaryDownload(matrix):
     completeMatrix = []
     print("Arrive {} news to download. ".format(len(matrix)))
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
 
-        future_to_url = {executor.submit(summary_download, matrix, completeMatrix, row): row for row in range(len(matrix))}
+        future_to_url = {executor.submit(summary_download_data, matrix, completeMatrix, row): row for row in range(len(matrix))}
         for future in concurrent.futures.as_completed(future_to_url):
             url = future_to_url[future]
         try:
@@ -227,7 +196,7 @@ def summaryDownload(matrix):
     return completeMatrix[:]
 
 
-def summary_download(matrix, completeMatrix, row):
+def summary_download_data(matrix, completeMatrix, row):
 
     url = matrix[row][2]
     article = Article(url)

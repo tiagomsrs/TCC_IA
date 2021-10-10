@@ -1,10 +1,11 @@
 import webbrowser
+import time
 import nltk
 
 from api import google_api
 from api import news_api
 from utils import utils
-import time
+
 
 
 
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     #     temas.append(str(input()))
     #     countTema -= 1
 
-    temas.append("brazil")
+    temas.append("neymar")
 
     inicio = time.time()
 
