@@ -1,0 +1,2 @@
+main                    - final product branch and releasable
+parallel_news_feature   - adding feature to get the news in parallel using Threads
