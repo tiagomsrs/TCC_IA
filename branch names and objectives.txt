@@ -1,0 +1,3 @@
+main                    - final product branch and releasable
+parallel_news_feature   - adding feature to get the news in parallel using Threads
+applying_NLP_and_sentimental_analyzes   - applying NLP and analyze the news to display to the user

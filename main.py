@@ -1,10 +1,11 @@
 import webbrowser
+import time
 import nltk
 
 from api import google_api
 from api import news_api
 from utils import utils
-import time
+
 
 
 
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         print("Time spend to download the news summary: " + str(fim - inicio))
 
         inicio = time.time()
-        completeMatrix = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
+        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
         fim = time.time()
 
         print("Time spend to format the news: " + str(fim - inicio))
