@@ -22,7 +22,7 @@ if __name__ == "__main__":
     #     temas.append(str(input()))
     #     countTema -= 1
 
-    temas.append("neymar")
+    temas.append("brazil")
 
     inicio = time.time()
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         print("Time spend to download the news summary: " + str(fim - inicio))
 
         inicio = time.time()
-        completeMatrix = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
+        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
         fim = time.time()
 
         print("Time spend to format the news: " + str(fim - inicio))

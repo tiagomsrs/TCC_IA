@@ -31,18 +31,6 @@ stopwordsPortuguese = stopwords.words('portuguese')
 tokenizer = treebank.TreebankWordTokenizer()
 
 
-
-file = 'NRC-Emotion-Lexicon-Wordlevel-v0.92.txt'
-
-# lexicon = pd.read_csv(file, names=['palavra', 'sentimento', 'pertence'], sep='\t')
-# print(lexicon.sentimento.unique())
-# print(lexicon.palavra.unique().shape)
-# print(lexicon[lexicon.pertence == 1].sentimento.value_counts())
-# lexicon[lexicon.pertence == 1].sentimento.value_counts().plot(kind = 'bar')
-# print(lexicon[(lexicon.pertence == 1) & (lexicon.sentimento == 'positive')].head(-10))
-#
-# print('a')
-
 def dateFormatGoogleApi ():
     """
     :return: Current and Previous date formated as string
@@ -172,7 +160,6 @@ def youtubeRemoval(matrix):
 
     return outputMatrix[:]
 
-
 def summaryDownload(matrix):
     """
     :param matrix: Complete matrix to download the content
@@ -195,7 +182,6 @@ def summaryDownload(matrix):
     print("It was possible to download {0} news .".format(len(completeMatrix)))
     return completeMatrix[:]
 
-
 def summary_download_data(matrix, completeMatrix, row):
 
     url = matrix[row][2]
@@ -214,7 +200,6 @@ def summary_download_data(matrix, completeMatrix, row):
     except Exception as e:
         print("Failed to download the content of url: " + url)
         print(e)
-
 
 def clean_html(text):
     soup = BeautifulSoup(text, "html")
@@ -241,6 +226,26 @@ def remove_stopwords(text, language):
 
     return " ".join(text)
 
+
+def majorityCheck(array):
+
+    neg_count = len(list(filter(lambda x: (x < 0), array)))
+    pos_count = len(list(filter(lambda x: (x > 0), array)))
+    neutral_count = len(list(filter(lambda x: (x == 0), array)))
+
+    arrayCount = [neg_count, neutral_count, pos_count]
+    max_index = arrayCount.index(max(arrayCount))
+
+    if max_index == 0:
+        return "negative"
+    elif max_index == 1:
+        return "neutral"
+    elif max_index == 2:
+        return "positive"
+    else:
+        return "neutral"
+
+
 def sentimentalAnalyzes(matrix, language):
     """
     :param language: language used on entire project
@@ -263,17 +268,35 @@ def sentimentalAnalyzes(matrix, language):
 
     plotWordCloud(matrix, language)
 
-    # pos_list = set(opinion_lexicon.positive())
-    # neg_list = set(opinion_lexicon.negative())
+    pos_list_opinion_lexicon = set(opinion_lexicon.positive())
+    neg_list_opinion_lexicon = set(opinion_lexicon.negative())
+    sentimentalCounterOpinionLexicon = list()
+    sentimentalCounterOpinionLexicon.append([sentimentCount(matrix[row][SUMMARY], pos_list_opinion_lexicon,neg_list_opinion_lexicon) for row in range(len(matrix))])
 
-   # dataset['sentiment_clean'] = dataset['clean_text'].apply(sentiment, args=(pos_list, neg_list))
-    # TODO : categorizar agora as noticias
-    # nrc_pos = set(pivot_lexicon[pivot_lexicon.positive == 1].palavra)
-    # nrc_neg = set(pivot_lexicon[pivot_lexicon.negative == 1].palavra)
-    # dataset['sentiment_clean_nrc'] = dataset['clean_text'].apply(sentiment, args=(nrc_pos, nrc_neg))
+    file = "utils/NRC-Emotion-Lexicon-Wordlevel-v0.92.txt"
+    lexicon = pd.read_csv(file, names=['palavra', 'sentimento', 'pertence'], sep='\t')
+    pivot_lexicon = lexicon.pivot(index='palavra', columns='sentimento', values='pertence').reset_index()
+    pos_list_nrc = set(pivot_lexicon[pivot_lexicon.positive == 1].palavra)
+    neg_list_nrc = set(pivot_lexicon[pivot_lexicon.negative == 1].palavra)
+    sentimentalCounterNRC = list()
+    sentimentalCounterNRC.append([sentimentCount(matrix[row][SUMMARY], pos_list_nrc, neg_list_nrc) for row in range(len(matrix))])
 
 
-    return None
+    file = "utils/WKWSCISentimentLexicon_v1.1.tab"
+    WKWSCI = pd.read_csv(file, sep='\t', header=0)
+    pos_list_WKWSCI = set(WKWSCI.loc[WKWSCI['sentiment'] > 0].values[:,0])
+    neg_list_WKWSCI = set(WKWSCI.loc[WKWSCI['sentiment'] < 0].values[:,0])
+    sentimentalCounterWKWSCI = list()
+    sentimentalCounterWKWSCI.append([sentimentCount(matrix[row][SUMMARY], pos_list_WKWSCI, neg_list_WKWSCI) for row in range(len(matrix))])
+
+    arraySentimentalAnalyzed = list()
+    for row in range(len(matrix)):
+        array = [sentimentalCounterOpinionLexicon[0][row], sentimentalCounterNRC[0][row], sentimentalCounterWKWSCI[0][row]]
+        arraySentimentalAnalyzed.append(majorityCheck(array))
+
+
+    # TODO - precisa melhorar a precisão, pois numa notícia onde fala que o brasil atingiu 600k de mortes, está dando como positiva
+    return arraySentimentalAnalyzed
 
 
 def sentimentCount(sentence, pos_list, neg_list):
@@ -301,7 +324,8 @@ def plotWordCloud(matrix, language):
         corpus += " " + matrix[row][SUMMARY]
 
     wc.generate(corpus)
-    plt.figure(figsize=(10, 20))
-    plt.imshow(wc)
-    plt.axis('off')
-    plt.show()
+    # plt.figure(figsize=(30, 30))
+    # plt.imshow(wc)
+    # plt.axis('off')
+    # # plt.show()
+    wc.to_file("wordcloud.png")
