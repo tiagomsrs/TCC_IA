@@ -31,7 +31,7 @@ stopwordsPortuguese = stopwords.words('portuguese')
 tokenizer = treebank.TreebankWordTokenizer()
 
 
-def dateFormatGoogleApi ():
+def dateFormatGoogleApi():
     """
     :return: Current and Previous date formated as string
     """
@@ -68,7 +68,7 @@ def dateFormatGoogleApi ():
 
     return currentDateFormated, lastDateFormated
 
-def dateFormatNewsApi ():
+def dateFormatNewsApi():
     """
     :return: Current and Previous date formated as string
     """
@@ -102,7 +102,7 @@ def dateFormatNewsApi ():
 
     return lastDateFormated
 
-def extractorGoogleApi (googleInput):
+def extractorGoogleApi(googleInput):
     """
     :param googleInput: Dataframe where:
 
@@ -119,7 +119,9 @@ def extractorGoogleApi (googleInput):
     dfTemp = list()
 
     for index in range(len(googleInput)):
-        aux = [googleInput.values[index][TITLE], googleInput.values[index][DATE], googleInput.values[index][LINK]]
+        aux = [googleInput.values[index][TITLE],
+               googleInput.values[index][DATE],
+               googleInput.values[index][LINK]]
         dfTemp.append(aux)
 
     return dfTemp.copy()
@@ -183,7 +185,13 @@ def summaryDownload(matrix):
     return completeMatrix[:]
 
 def summary_download_data(matrix, completeMatrix, row):
+    """
 
+    :param matrix:
+    :param completeMatrix:
+    :param row:
+    :return:
+    """
     url = matrix[row][2]
     article = Article(url)
     try:
@@ -202,6 +210,11 @@ def summary_download_data(matrix, completeMatrix, row):
         print(e)
 
 def clean_html(text):
+    """
+
+    :param text:
+    :return:
+    """
     soup = BeautifulSoup(text, "html")
     for s in soup(['script', 'style']):
         s.decompose()
@@ -209,12 +222,23 @@ def clean_html(text):
     return "".join(soup.stripped_strings)
 
 def remove_punctuation(text):
+    """
+
+    :param text:
+    :return:
+    """
     text = [word for word in text if word not in string.punctuation]
     text = ''.join(text)
 
     return text
 
 def remove_stopwords(text, language):
+    """
+
+    :param text:
+    :param language:
+    :return:
+    """
     # TODO : tentar achar alguma maneira de detectar a linguagem que está o texto para evitar problema de stopword errado
 
     text = unidecode(text)
@@ -226,9 +250,12 @@ def remove_stopwords(text, language):
 
     return " ".join(text)
 
-
 def majorityCheck(array):
+    """
 
+    :param array:
+    :return:
+    """
     neg_count = len(list(filter(lambda x: (x < 0), array)))
     pos_count = len(list(filter(lambda x: (x > 0), array)))
     neutral_count = len(list(filter(lambda x: (x == 0), array)))
@@ -244,7 +271,6 @@ def majorityCheck(array):
         return "positive"
     else:
         return "neutral"
-
 
 def sentimentalAnalyzes(matrix, language):
     """
@@ -298,8 +324,14 @@ def sentimentalAnalyzes(matrix, language):
     # TODO - precisa melhorar a precisão, pois numa notícia onde fala que o brasil atingiu 600k de mortes, está dando como positiva
     return arraySentimentalAnalyzed
 
-
 def sentimentCount(sentence, pos_list, neg_list):
+    """
+
+    :param sentence:
+    :param pos_list:
+    :param neg_list:
+    :return:
+    """
     sent = 0
     words = [word for word in tokenizer.tokenize(sentence)]
 
@@ -312,6 +344,12 @@ def sentimentCount(sentence, pos_list, neg_list):
     return sent
 
 def plotWordCloud(matrix, language):
+    """
+
+    :param matrix:
+    :param language:
+    :return:
+    """
     SUMMARY = 1
 
     if language == 'pt':
