@@ -1,42 +1,36 @@
 import webbrowser
 import time
-import nltk
-
 from api import google_api
 from api import news_api
 from utils import utils
 
 
-
-
-
 if __name__ == "__main__":
-    language = 'en'
-    page_size = 20
+    LANGUAGUE = 'en'
+    PAGE_SIZE = 20
 
     print('Entre com a quantidade de temas: ')
     # countTema = int(input())
-    temas = list()
-    #
+
+    temas = ["sweden"]
+
     # while (countTema > 0):
     #     temas.append(str(input()))
     #     countTema -= 1
 
-    temas.append("brazil")
-
     inicio = time.time()
 
     try:
-        googleOutput = google_api.GoogleApi(temas[0], language)
+        googleOutput = google_api.GoogleApi(temas[0], LANGUAGUE)
         news_1 = utils.extractorGoogleApi(googleOutput)
-    except:
+    except Exception as e:
         print("Failed to get the news from Google Api")
 
     try:
-        newsOutput = news_api.NewsApi(temas, language, page_size)['articles']
+        newsOutput = news_api.NewsApi(temas, LANGUAGUE, PAGE_SIZE)['articles']
         news_2 = utils.extractorNewsApi(newsOutput)
-    except:
-        print("Failed to get the news from News Api")
+    except Exception as e:
+        print("Failed to get the news from News Api.")
 
     fim = time.time()
     print("Time spend to search Google e News API:" + str(fim - inicio))
@@ -52,7 +46,7 @@ if __name__ == "__main__":
         print("Time spend to download the news summary: " + str(fim - inicio))
 
         inicio = time.time()
-        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
+        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), LANGUAGUE)
         fim = time.time()
 
         print("Time spend to format the news: " + str(fim - inicio))
@@ -66,4 +60,3 @@ if __name__ == "__main__":
         # with open('test.txt', 'w') as f:
         #     f.write(str(completeMatrix))
         # f.close()
-
