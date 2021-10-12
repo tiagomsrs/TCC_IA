@@ -1,21 +1,13 @@
 import re
-import _thread
 import pandas as pd
 import wget
 import os
 import nltk
-nltk.download('punkt')
-from zipfile import ZipFile
 
-nltk.download('opinion_lexicon')
-nltk.download('stopwords')
 
 from nltk.corpus import opinion_lexicon
 import string
-import matplotlib.pyplot as plt
 
-from zipfile import ZipFile
-import time
 from newspaper import Article
 from datetime import date, datetime
 from bs4 import BeautifulSoup
@@ -24,12 +16,29 @@ from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
 import concurrent.futures
+import tweepy
+import json
+
+nltk.download('punkt')
+
+
+nltk.download('opinion_lexicon')
+nltk.download('stopwords')
 
 stopwordsEnglish = stopwords.words('english')
 stopwordsPortuguese = stopwords.words('portuguese')
-
 tokenizer = treebank.TreebankWordTokenizer()
 
+TWITTER_CONSUMER_KEY = "ktAHnlHevDnBaQiF46RNJd9yy"
+TWITTER_CONSUMER_SECRET = "2QQgh8SE1t6snv9bDCKre9JsBfHQov0S7Dn5ZRfVClBIa8uYQk"
+TWITTER_ACCESS_TOKEN = "1251614775940984841-eJvICi2AVAGYBckaLp3QsNyzN5MAXS"
+TWITTER_ACCESS_TOKEN_SECRET = "lve6sJt6DQEh127nlESUU9ei0sFk6zIULmNB3U0jG8MCh"
+TWITTER_BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADdZUgEAAAAAjqaN72bRtJpKk6JDtwYfrgXMQXo%3DyxWovPFP3HislduYDCuF5ln1622fE4BF4ibmKrteDnUyinD5hl"
+DEFAULT_THRESHOLD = 10
+
+auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth)
 
 def dateFormatGoogleApi():
     """
@@ -367,3 +376,55 @@ def plotWordCloud(matrix, language):
     # plt.axis('off')
     # # plt.show()
     wc.to_file("wordcloud.png")
+
+def twitterTrendCollection(woeid):
+    """
+
+    :param woeid:
+    :return:
+    """
+    brazil_trends = api.get_place_trends(woeid)
+    trends = json.loads(json.dumps(brazil_trends, indent=1))
+    top20TwitterTrends = dict()
+
+    for row in range(20):
+        top20TwitterTrends[trends[0]['trends'][row]['name']] = trends[0]['trends'][row]['url']
+
+    return top20TwitterTrends
+
+
+# Coletando tweets
+class CustomStreamListener(tweepy.Stream):
+    """
+
+    """
+    def on_status(self, tweet):
+        # Quando receber algum status, esta função pode manipular o objeto tweet. Exemplos:
+        print(tweet.author.screen_name)
+        print(tweet.text.encode('utf-8'))
+        api.create_favorite(tweet.id)
+
+        return True
+
+    def on_error(self, status_code):
+        print("Erro com o código:", status_code)
+        return True  # Não mata o coletor
+
+    def on_timeout(self):
+        print("Tempo esgotado!")
+        return True  # Não mata o coletor        return True  # Não mata o coletor
+
+def collectTweetBasedOnPreferenceAndAnalyze(topicToAnalyze, language):
+    """
+
+    :param topicToAnalyze:
+    :param language:
+    :return:
+    """
+
+    # Criando o coletor com timeout de 20 seg
+    streaming_api = tweepy.streaming.Stream(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
+                                            TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+    streaming_api.filter(follow=None, track=topicToAnalyze, languages=language)
+
+    return None
