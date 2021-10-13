@@ -9,7 +9,7 @@ app = Flask(__name__)
 PAGE_SIZE = 20
 
 WOIED = {
-        "brasil": 23424768,
+        "brazil": 23424768,
         "sweden": 23424954,
         "usa": 23424977,
         "world": 1,
@@ -19,13 +19,13 @@ WOIED = {
 # use decorators to link the function to a url
 @app.route('/')
 def home():
-    # http://127.0.0.1:5000/
+    # http://192.168.1.23:5000/
     return "Server online!"
 
 
 @app.route('/searchNews/<temas>/<language>')
 def searchNews(temas, language='en'):
-    # http://127.0.0.1:5000/searchNews/brazil
+    # http://192.168.1.23:5000/searchNews/brasil/pt
 
     inicio = time.time()
     try:
@@ -71,17 +71,17 @@ def searchNews(temas, language='en'):
 
 @app.route('/searchTrendsTwitter/<woeid>')
 def searchTrendsTwitter(woeid):
-    # http://127.0.0.1:5000/searchTrendsTwitter
+    # http://192.168.1.23:5000/searchTrendsTwitter/brazil
     top20TwitterTrends = utils.twitterTrendCollection(WOIED[woeid])
     return jsonify(top20TwitterTrends)
 
 
 @app.route('/keywordTwitterSearch/<keyword>/<language>')
 def keywordTwitterSearch(keyword, language='en'):
-    #http://127.0.0.1:5000/keywordTwitterSearch/
+    #http://192.168.1.23:5000/keywordTwitterSearch/ps5/pt
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
     return jsonify(tweets)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='192.168.1.23')
