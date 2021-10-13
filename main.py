@@ -23,48 +23,48 @@ if __name__ == "__main__":
     #     countTema -= 1
 
 
-    # inicio = time.time()
-    #
-    # try:
-    #     googleOutput = google_api.GoogleApi(temas[0], LANGUAGUE)
-    #     news_1 = utils.extractorGoogleApi(googleOutput)
-    # except Exception as e:
-    #     print("Failed to get the news from Google Api")
-    #
-    # try:
-    #     newsOutput = news_api.NewsApi(temas, LANGUAGUE, PAGE_SIZE)['articles']
-    #     news_2 = utils.extractorNewsApi(newsOutput)
-    # except Exception as e:
-    #     print("Failed to get the news from News Api.")
-    #
-    # fim = time.time()
-    # print("Time spend to search Google e News API:" + str(fim - inicio))
-    #
-    #
-    # if news_1 and news_2:
-    #
-    #     newsMatrix = utils.youtubeRemoval(news_1 + news_2)
-    #
-    #     inicio = time.time()
-    #     completeMatrix = utils.summaryDownload(newsMatrix)
-    #     fim = time.time()
-    #     print("Time spend to download the news summary: " + str(fim - inicio))
-    #
-    #     inicio = time.time()
-    #     arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), LANGUAGUE)
-    #     fim = time.time()
-    #
-    #     print("Time spend to format the news: " + str(fim - inicio))
-    #
-    #
-    #     # chrome_path = '/usr/bin/google-chrome %s'
-    #     #
-    #     # for index in range(0, len(completeMatrix), 3):
-    #     #     webbrowser.get(chrome_path).open(completeMatrix[index][0][2])
-    #
-    #     # with open('test.txt', 'w') as f:
-    #     #     f.write(str(completeMatrix))
-    #     # f.close()
+    inicio = time.time()
+
+    try:
+        googleOutput = google_api.GoogleApi(temas[0], LANGUAGUE)
+        news_1 = utils.extractorGoogleApi(googleOutput)
+    except Exception as e:
+        print("Failed to get the news from Google Api")
+
+    try:
+        newsOutput = news_api.NewsApi(temas, LANGUAGUE, PAGE_SIZE)['articles']
+        news_2 = utils.extractorNewsApi(newsOutput)
+    except Exception as e:
+        print("Failed to get the news from News Api.")
+
+    fim = time.time()
+    print("Time spend to search Google e News API:" + str(fim - inicio))
+
+
+    if news_1 and news_2:
+
+        newsMatrix = utils.youtubeRemoval(news_1 + news_2)
+
+        inicio = time.time()
+        completeMatrix = utils.summaryDownload(newsMatrix)
+        fim = time.time()
+        print("Time spend to download the news summary: " + str(fim - inicio))
+
+        inicio = time.time()
+        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), LANGUAGUE)
+        fim = time.time()
+
+        print("Time spend to format the news: " + str(fim - inicio))
+
+
+        # chrome_path = '/usr/bin/google-chrome %s'
+        #
+        # for index in range(0, len(completeMatrix), 3):
+        #     webbrowser.get(chrome_path).open(completeMatrix[index][0][2])
+
+        # with open('test.txt', 'w') as f:
+        #     f.write(str(completeMatrix))
+        # f.close()
 
     BRAZIL_WOE_ID = 23424768
     SWEDEN_WOE_ID = 23424954
