@@ -1,21 +1,10 @@
 import re
-import _thread
 import pandas as pd
 import wget
 import os
 import nltk
-nltk.download('punkt')
-from zipfile import ZipFile
-
-nltk.download('opinion_lexicon')
-nltk.download('stopwords')
-
 from nltk.corpus import opinion_lexicon
 import string
-import matplotlib.pyplot as plt
-
-from zipfile import ZipFile
-import time
 from newspaper import Article
 from datetime import date, datetime
 from bs4 import BeautifulSoup
@@ -24,12 +13,27 @@ from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
 import concurrent.futures
+import tweepy
+import json
+from tweepy import Stream
+nltk.download('punkt')
+nltk.download('opinion_lexicon')
+nltk.download('stopwords')
 
 stopwordsEnglish = stopwords.words('english')
 stopwordsPortuguese = stopwords.words('portuguese')
-
 tokenizer = treebank.TreebankWordTokenizer()
 
+TWITTER_CONSUMER_KEY = "ktAHnlHevDnBaQiF46RNJd9yy"
+TWITTER_CONSUMER_SECRET = "2QQgh8SE1t6snv9bDCKre9JsBfHQov0S7Dn5ZRfVClBIa8uYQk"
+TWITTER_ACCESS_TOKEN = "1251614775940984841-eJvICi2AVAGYBckaLp3QsNyzN5MAXS"
+TWITTER_ACCESS_TOKEN_SECRET = "lve6sJt6DQEh127nlESUU9ei0sFk6zIULmNB3U0jG8MCh"
+TWITTER_BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADdZUgEAAAAAjqaN72bRtJpKk6JDtwYfrgXMQXo%3DyxWovPFP3HislduYDCuF5ln1622fE4BF4ibmKrteDnUyinD5hl"
+DEFAULT_THRESHOLD = 10
+
+auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth)
 
 def dateFormatGoogleApi():
     """
@@ -292,7 +296,7 @@ def sentimentalAnalyzes(matrix, language):
         matrix[row][SUMMARY] = matrix[row][SUMMARY].lower()
 
 
-    plotWordCloud(matrix, language)
+    plotWordCloud(matrix, language, "trendwordcloud.png")
 
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
     neg_list_opinion_lexicon = set(opinion_lexicon.negative())
@@ -343,7 +347,7 @@ def sentimentCount(sentence, pos_list, neg_list):
 
     return sent
 
-def plotWordCloud(matrix, language):
+def plotWordCloud(matrix, language,name):
     """
 
     :param matrix:
@@ -366,4 +370,54 @@ def plotWordCloud(matrix, language):
     # plt.imshow(wc)
     # plt.axis('off')
     # # plt.show()
-    wc.to_file("wordcloud.png")
+    wc.to_file(name)
+
+def twitterTrendCollection(woeid):
+    """
+    This method returns the trending topics from a region posted on Twitter
+    :param woeid:
+    :return:
+    """
+    brazil_trends = api.get_place_trends(woeid)
+    trends = json.loads(json.dumps(brazil_trends, indent=1))
+    top20TwitterTrends = dict()
+
+    for row in range(20):
+        top20TwitterTrends[trends[0]['trends'][row]['name']] = trends[0]['trends'][row]['url']
+
+    return top20TwitterTrends
+
+def collectTweetBasedOnPreferenceAndAnalyze(topicToAnalyze, language):
+    """
+    Collect 100 tweets and analyze their context
+    :param topicToAnalyze:
+    :param language:
+    :return:
+    """
+
+    api = tweepy.API(auth)
+    # for tweet in tweepy.Cursor(api.search_tweets,
+    #                            q="google",
+    #                            count=10,
+    #                            result_type="mixed",
+    #                            include_entities=True,
+    #                            lang="en").items():
+    #     print(tweet.text)
+    # return None
+    result = tweepy.API.search_tweets
+    result = api.search_tweets(topicToAnalyze, lang=language, result_type="mixed",count=50)
+
+    tweets = []
+    for index in range(result.count):
+            tweet = [result[index]._json['user']['name'], result[index]._json['text'], result[index]._json['created_at']]
+            tweets.append(tweet)
+
+    for row in range(result.count):
+        tweets[row][1] = clean_html(tweets[row][1])
+        tweets[row][1] = remove_punctuation(tweets[row][1])
+        tweets[row][1] = remove_stopwords(tweets[row][1], language)
+        tweets[row][1] = tweets[row][1].lower()
+
+    plotWordCloud(tweets, language,"twiter.png")
+
+    return tweets

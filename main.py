@@ -1,11 +1,12 @@
-"""
-
-"""
 # import webbrowser
 import time
 from api import google_api
 from api import news_api
 from utils import utils
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -20,6 +21,7 @@ if __name__ == "__main__":
     # while (countTema > 0):
     #     temas.append(str(input()))
     #     countTema -= 1
+
 
     inicio = time.time()
 
@@ -63,3 +65,20 @@ if __name__ == "__main__":
         # with open('test.txt', 'w') as f:
         #     f.write(str(completeMatrix))
         # f.close()
+
+    BRAZIL_WOE_ID = 23424768
+    SWEDEN_WOE_ID = 23424954
+    USA_WOE_ID = 23424977
+    WORLD_WOE_ID = 1
+    ARGENTINA_WOE_ID = 23424747
+
+    woeid = ARGENTINA_WOE_ID
+
+    top20TwitterTrends = utils.twitterTrendCollection(woeid)
+
+    for key, value in top20TwitterTrends.items():
+        tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(key, LANGUAGUE)
+        break
+
+
+    print(top20TwitterTrends)
