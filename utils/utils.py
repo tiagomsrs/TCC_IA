@@ -387,25 +387,18 @@ def twitterTrendCollection(woeid):
 
     return top20TwitterTrends
 
-def collectTweetBasedOnPreferenceAndAnalyze(topicToAnalyze, language):
+def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
     """
     Collect 100 tweets and analyze their context
-    :param topicToAnalyze:
+    :param keyword:
     :param language:
     :return:
     """
 
     api = tweepy.API(auth)
-    # for tweet in tweepy.Cursor(api.search_tweets,
-    #                            q="google",
-    #                            count=10,
-    #                            result_type="mixed",
-    #                            include_entities=True,
-    #                            lang="en").items():
-    #     print(tweet.text)
-    # return None
+
     result = tweepy.API.search_tweets
-    result = api.search_tweets(topicToAnalyze, lang=language, result_type="mixed",count=50)
+    result = api.search_tweets(keyword, lang=language, result_type="mixed",count=50)
 
     tweets = []
     for index in range(result.count):
