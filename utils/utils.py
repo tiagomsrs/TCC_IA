@@ -3,11 +3,8 @@ import pandas as pd
 import wget
 import os
 import nltk
-
-
 from nltk.corpus import opinion_lexicon
 import string
-
 from newspaper import Article
 from datetime import date, datetime
 from bs4 import BeautifulSoup
@@ -18,10 +15,8 @@ from wordcloud import WordCloud
 import concurrent.futures
 import tweepy
 import json
-
+from tweepy import Stream
 nltk.download('punkt')
-
-
 nltk.download('opinion_lexicon')
 nltk.download('stopwords')
 
@@ -301,7 +296,7 @@ def sentimentalAnalyzes(matrix, language):
         matrix[row][SUMMARY] = matrix[row][SUMMARY].lower()
 
 
-    plotWordCloud(matrix, language)
+    plotWordCloud(matrix, language, "trendwordcloud.png")
 
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
     neg_list_opinion_lexicon = set(opinion_lexicon.negative())
@@ -352,7 +347,7 @@ def sentimentCount(sentence, pos_list, neg_list):
 
     return sent
 
-def plotWordCloud(matrix, language):
+def plotWordCloud(matrix, language,name):
     """
 
     :param matrix:
@@ -375,11 +370,11 @@ def plotWordCloud(matrix, language):
     # plt.imshow(wc)
     # plt.axis('off')
     # # plt.show()
-    wc.to_file("wordcloud.png")
+    wc.to_file(name)
 
 def twitterTrendCollection(woeid):
     """
-
+    This method returns the trending topics from a region posted on Twitter
     :param woeid:
     :return:
     """
@@ -392,39 +387,37 @@ def twitterTrendCollection(woeid):
 
     return top20TwitterTrends
 
-
-# Coletando tweets
-class CustomStreamListener(tweepy.Stream):
-    """
-
-    """
-    def on_status(self, tweet):
-        # Quando receber algum status, esta função pode manipular o objeto tweet. Exemplos:
-        print(tweet.author.screen_name)
-        print(tweet.text.encode('utf-8'))
-        api.create_favorite(tweet.id)
-
-        return True
-
-    def on_error(self, status_code):
-        print("Erro com o código:", status_code)
-        return True  # Não mata o coletor
-
-    def on_timeout(self):
-        print("Tempo esgotado!")
-        return True  # Não mata o coletor        return True  # Não mata o coletor
-
 def collectTweetBasedOnPreferenceAndAnalyze(topicToAnalyze, language):
     """
-
+    Collect 100 tweets and analyze their context
     :param topicToAnalyze:
     :param language:
     :return:
     """
 
-    # Criando o coletor com timeout de 20 seg
-    streaming_api = tweepy.streaming.Stream(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET,
-                                            TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-    streaming_api.filter(follow=None, track=topicToAnalyze, languages=language)
+    api = tweepy.API(auth)
+    # for tweet in tweepy.Cursor(api.search_tweets,
+    #                            q="google",
+    #                            count=10,
+    #                            result_type="mixed",
+    #                            include_entities=True,
+    #                            lang="en").items():
+    #     print(tweet.text)
+    # return None
+    result = tweepy.API.search_tweets
+    result = api.search_tweets(topicToAnalyze, lang=language, result_type="mixed",count=50)
 
-    return None
+    tweets = []
+    for index in range(result.count):
+            tweet = [result[index]._json['user']['name'], result[index]._json['text'], result[index]._json['created_at']]
+            tweets.append(tweet)
+
+    for row in range(result.count):
+        tweets[row][1] = clean_html(tweets[row][1])
+        tweets[row][1] = remove_punctuation(tweets[row][1])
+        tweets[row][1] = remove_stopwords(tweets[row][1], language)
+        tweets[row][1] = tweets[row][1].lower()
+
+    plotWordCloud(tweets, language,"twiter.png")
+
+    return tweets

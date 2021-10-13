@@ -77,7 +77,7 @@ if __name__ == "__main__":
     top20TwitterTrends = utils.twitterTrendCollection(woeid)
 
     for key, value in top20TwitterTrends.items():
-        utils.collectTweetBasedOnPreferenceAndAnalyze(value, LANGUAGUE)
+        tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(key, LANGUAGUE)
         break
 
 
