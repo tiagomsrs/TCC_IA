@@ -394,22 +394,24 @@ def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
     :param language:
     :return:
     """
-
+    ORIGINALTEXT = 1
+    ANALYZEDTEXT = 2
     api = tweepy.API(auth)
 
-    result = tweepy.API.search_tweets
-    result = api.search_tweets(keyword, lang=language, result_type="mixed",count=50)
+
+    result = api.search_tweets(keyword, lang=language, result_type="mixed",count=50,tweet_mode='extended')
 
     tweets = []
     for index in range(result.count):
-            tweet = [result[index]._json['user']['name'], result[index]._json['text'], result[index]._json['created_at']]
+            tweet = [result[index]._json['user']['name'], result[index]._json['full_text'], "",
+                     result[index]._json['created_at']]
             tweets.append(tweet)
 
     for row in range(result.count):
-        tweets[row][1] = clean_html(tweets[row][1])
-        tweets[row][1] = remove_punctuation(tweets[row][1])
-        tweets[row][1] = remove_stopwords(tweets[row][1], language)
-        tweets[row][1] = tweets[row][1].lower()
+        tweets[row][ANALYZEDTEXT] = clean_html(tweets[row][ORIGINALTEXT])
+        tweets[row][ANALYZEDTEXT] = remove_punctuation(tweets[row][ANALYZEDTEXT])
+        tweets[row][ANALYZEDTEXT] = remove_stopwords(tweets[row][ANALYZEDTEXT], language)
+        tweets[row][ANALYZEDTEXT] = tweets[row][ANALYZEDTEXT].lower()
 
     plotWordCloud(tweets, language,"twiter.png")
 

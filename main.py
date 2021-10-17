@@ -5,6 +5,7 @@ from api import news_api
 from utils import utils
 from flask import Flask, render_template,jsonify
 
+
 app = Flask(__name__)
 PAGE_SIZE = 20
 
@@ -18,13 +19,14 @@ WOIED = {
 
 # use decorators to link the function to a url
 @app.route('/')
-def home():
+def index():
     # http://192.168.1.23:5000/
-    return "Server online!"
+    return render_template('index.html')
 
 
 @app.route('/searchNews/<temas>/<language>')
 def searchNews(temas, language='en'):
+    # TODO arrumar temas com espaços
     # http://192.168.1.23:5000/searchNews/brasil/pt
 
     inicio = time.time()
@@ -85,3 +87,4 @@ def keywordTwitterSearch(keyword, language='en'):
 
 if __name__ == "__main__":
     app.run(debug=True, host='192.168.1.23')
+
