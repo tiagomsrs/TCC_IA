@@ -78,7 +78,7 @@ def searchTrendsTwitter(woeid):
     return jsonify(top20TwitterTrends)
 
 
-@app.route('/keywordTwitterSearch/<keyword>/<language>')
+@app.route('/keywordTwitterSearch/<keyword>/<language>', methods=['GET'])
 def keywordTwitterSearch(keyword, language='en'):
     #http://192.168.1.23:5000/keywordTwitterSearch/ps5/pt
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
@@ -87,4 +87,6 @@ def keywordTwitterSearch(keyword, language='en'):
 
 if __name__ == "__main__":
     app.run(debug=True, host='192.168.1.23')
+
+
 

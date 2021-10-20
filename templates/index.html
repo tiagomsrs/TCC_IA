@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1 style="text-align: center;"><span style="color:#0000CD;">Op&ccedil;&otilde;es do sistema</span></h1>
+    <h1 style="text-align: center;"><span style="color:#0000CD;">Op&ccedil;&otilde;es do sistema</span></h1>
+    <input type="text" id="language" name="language" value="en">
 
-<h2>Buscar Not&iacute;cias:</h2>
+    <h2>Buscar Not&iacute;cias:</h2>
+        <input type="text" id="searchNewsText" name="searchNewsText" class="form-control">
+        <button type="submit" id="btnSearchNews" onclick="searchNews()" >Search</button>
 
-<p><input name="searchNews" type="text" /><input name="searchNewsButton" type="button" value="Search" /></p>
+    <h2>Buscar Trending Topics por Pa&iacute;s:</h2>
+        <input type="text" id="trendingTopicSearchText" name="trendingTopicSearchText" class="form-control">
+        <button type="submit" id="btnTrendingTopics" onclick="trendingTopics()">Search</button>
 
-<h2>Buscar Trending Topics por Pa&iacute;s:</h2>
-
-<p><input name="trendingTopicsSearch" type="text" /><input name="trendingTopicsButton" type="button" value="Search" /></p>
-
-<h2>Buscar Tweets com palavra-chave:</h2>
-
-<p><input name="keywordTweet" type="text" /><input name="keywordButton" type="button" value="Search" /></p>
+    <h2>Buscar Tweets com palavra-chave:</h2>
+        <input type="text" id="searchTweetKeywordText" name="searchTweetKeywordText" class="form-control">
+        <button type="submit" id="btnSearchTweetKeyword" onclick="tweetKeyword()">Search</button>
 </body>
 </html>
+<script>
+function searchNews() {
+    var oReq = new XMLHttpRequest();
+    var searchNewsBaseRoute = 'http://192.168.1.23:5000/searchNews/';
+    var searchNewsText = document.getElementById("searchNewsText").value;
+    var language = document.getElementById("language").value;
+    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
+    window.open(url).focus();
+}
+</script>
+
+<script>
+function trendingTopics() {
+    var oReq = new XMLHttpRequest();
+    var searchNewsBaseRoute = 'http://192.168.1.23:5000/searchTrendsTwitter/';
+    var searchNewsText = document.getElementById("trendingTopicSearchText").value;
+    var url = searchNewsBaseRoute.concat(searchNewsText);
+    window.open(url).focus();
+}
+</script>
+
+<script>
+function tweetKeyword() {
+    var oReq = new XMLHttpRequest();
+    var searchNewsBaseRoute = 'http://192.168.1.23:5000/keywordTwitterSearch/';
+    var searchNewsText = document.getElementById("searchTweetKeywordText").value;
+    var language = document.getElementById("language").value;
+    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
+    window.open(url).focus();
+}
+</script>
+
+
