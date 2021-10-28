@@ -11,9 +11,12 @@ PAGE_SIZE = 20
 
 WOIED = {
         "brazil": 23424768,
+        "brasil": 23424768,
         "sweden": 23424954,
+        "suecia": 23424954,
         "usa": 23424977,
         "world": 1,
+        "mundo": 1,
         "argentina": 23424747
 }
 
@@ -84,9 +87,17 @@ def keywordTwitterSearch(keyword, language='en'):
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
     return jsonify(tweets)
 
+@app.route('/savePositiveNews/<news>/<user>', methods=['GET'])
+def savePositiveNews(news, user):
+    #http://192.168.1.23:5000/savePositiveNews/5-6-7-8/tiagomsrs
+    return jsonify()
+
+@app.route('/saveNegativeNews/<news>/<user>', methods=['GET'])
+def saveNegativeNews(news, user):
+    #http://192.168.1.23:5000/saveNegativeNews/1-2-3-4/tiagomsrs
+    return jsonify()
 
 if __name__ == "__main__":
-    app.run(debug=True, host='192.168.1.23')
-
-
-
+    IP = "10.20.41.126"
+    app.config['JSON_AS_ASCII'] = False
+    app.run(debug=True, host=IP)

@@ -3,8 +3,13 @@ import pandas as pd
 import wget
 import os
 import nltk
-from nltk.corpus import opinion_lexicon
+import unicodedata
 import string
+import concurrent.futures
+import tweepy
+import json
+
+from nltk.corpus import opinion_lexicon
 from newspaper import Article
 from datetime import date, datetime
 from bs4 import BeautifulSoup
@@ -12,9 +17,9 @@ from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
-import concurrent.futures
-import tweepy
-import json
+from pymongo import MongoClient
+from pprint import pprint
+
 from tweepy import Stream
 nltk.download('punkt')
 nltk.download('opinion_lexicon')
@@ -410,6 +415,7 @@ def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
     for index in range(result.count):
             tweet = [result[index]._json['user']['name'], result[index]._json['full_text'], "",
                      result[index]._json['created_at']]
+            tweet[1].encode('utf-8', 'ignore')
             tweets.append(tweet)
 
     for row in range(result.count):
@@ -421,3 +427,5 @@ def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
     plotWordCloud(tweets, language,"twiter.png")
 
     return tweets
+
+
