@@ -1,3 +1,22 @@
 {
-
+    "user": [
+        {
+          "id": "default",
+          "words": [
+            {
+              "positiveWords": ["a", "b", "c"],
+              "negativeWords": ["d", "e", "f"]
+            }
+          ]
+        },
+        {
+          "id": "tiagomsrs",
+          "words": [
+            {
+              "positiveWords": ["technology", "brasil", "game"],
+              "negativeWords": ["lula", "juros", "inflação"]
+            }
+          ]
+        }
+    ]
 }

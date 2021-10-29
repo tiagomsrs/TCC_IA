@@ -333,7 +333,7 @@ def sentimentalAnalyzes(matrix, language):
     # TODO - precisa melhorar a precisão, pois numa notícia onde fala que o brasil atingiu 600k de mortes, está dando como positiva
     result = []
     for row in range(len(matrix)):
-        array = [matrix[row][0][0], matrix[row][0][2], arraySentimentalAnalyzed[row]]
+        array = [row, matrix[row][0][0], matrix[row][0][2], arraySentimentalAnalyzed[row]]
         result.append(array)
 
     return result

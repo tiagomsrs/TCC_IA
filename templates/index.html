@@ -3,8 +3,8 @@
 <body>
     <h1 style="text-align: center;"><span style="color:#0000CD;">Op&ccedil;&otilde;es do sistema</span></h1>
 
-    <h3><strong>Usu&aacute;rio:<input name="usuario" type="text" value="tiagomsrs"/></strong></h3>
-    <h3><strong>Idioma:   <input name="language" type="text" value="en"/></strong></h3>
+    <h3><strong>Usu&aacute;rio:<input name="usuario" id="usuario" type="text" value="tiagomsrs"/></strong></h3>
+    <h3><strong>Idioma:   <input name="language" id ="language" type="text" value="en"/></strong></h3>
 
     <h3>Buscar Not&iacute;cias:</h3>
         <input type="text" id="searchNewsText" name="searchNewsText" class="form-control">
@@ -31,10 +31,11 @@
 <script>
 function searchNews() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://10.20.41.126:5000/searchNews/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/searchNews/';
     var searchNewsText = document.getElementById("searchNewsText").value;
     var language = document.getElementById("language").value;
-    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
+    var usuario = document.getElementById("usuario").value;
+    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language,'/',usuario);
     window.open(url).focus();
 }
 </script>
@@ -42,7 +43,7 @@ function searchNews() {
 <script>
 function trendingTopics() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://10.20.41.126:5000/searchTrendsTwitter/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/searchTrendsTwitter/';
     var searchNewsText = document.getElementById("trendingTopicSearchText").value;
     var url = searchNewsBaseRoute.concat(searchNewsText);
     window.open(url).focus();
@@ -52,7 +53,7 @@ function trendingTopics() {
 <script>
 function tweetKeyword() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://10.20.41.126:5000/keywordTwitterSearch/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/keywordTwitterSearch/';
     var searchNewsText = document.getElementById("searchTweetKeywordText").value;
     var language = document.getElementById("language").value;
     var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
@@ -63,7 +64,7 @@ function tweetKeyword() {
 <script>
 function savePositiveNews() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://10.20.41.126:5000/savePositiveNews/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/savePositiveNews/';
     var positiveNews = document.getElementById("inputPositiveNews").value;
     var usuario = document.getElementById("usuario").value;
     var url = searchNewsBaseRoute.concat(positiveNews, '/',usuario);
@@ -74,7 +75,7 @@ function savePositiveNews() {
 <script>
 function saveNegativeNews() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://10.20.41.126:5000/saveNegativeNews/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/saveNegativeNews/';
     var negativeNews = document.getElementById("inputNegativeNews").value;
     var usuario = document.getElementById("usuario").value;
     var url = searchNewsBaseRoute.concat(negativeNews, '/',usuario);

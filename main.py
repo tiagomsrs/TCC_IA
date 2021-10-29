@@ -1,9 +1,10 @@
 # import webbrowser
-import time
+import time, json, os
 from api import google_api
 from api import news_api
 from utils import utils
 from flask import Flask, render_template,jsonify
+from pathlib import Path
 
 
 app = Flask(__name__)
@@ -23,14 +24,14 @@ WOIED = {
 # use decorators to link the function to a url
 @app.route('/')
 def index():
-    # http://192.168.1.23:5000/
+    # http://192.168.1.104:5000/
     return render_template('index.html')
 
 
-@app.route('/searchNews/<temas>/<language>')
-def searchNews(temas, language='en'):
+@app.route('/searchNews/<temas>/<language>/<user>')
+def searchNews(temas, language='en', user='tiagomsrs'):
     # TODO arrumar temas com espaços
-    # http://192.168.1.23:5000/searchNews/brasil/pt
+    # http://192.168.1.104:5000/searchNews/brasil/pt
 
     inicio = time.time()
     try:
@@ -71,33 +72,57 @@ def searchNews(temas, language='en'):
         #     f.write(str(completeMatrix))
         # f.close()
 
+    filename = user + "_tempNews.json"
+    data_folder = Path("database/")
+    file_to_open = data_folder / filename
+
+    arraySentimentalAnalyzedDict = json.dumps(arraySentimentalAnalyzed)
+    with open(file_to_open, 'w') as f:
+        f.write(arraySentimentalAnalyzedDict)
+
     return jsonify(arraySentimentalAnalyzed)
 
 
 @app.route('/searchTrendsTwitter/<woeid>')
 def searchTrendsTwitter(woeid):
-    # http://192.168.1.23:5000/searchTrendsTwitter/brazil
+    # http://192.168.1.104:5000/searchTrendsTwitter/brazil
     top20TwitterTrends = utils.twitterTrendCollection(WOIED[woeid])
     return jsonify(top20TwitterTrends)
 
 
 @app.route('/keywordTwitterSearch/<keyword>/<language>', methods=['GET'])
 def keywordTwitterSearch(keyword, language='en'):
-    #http://192.168.1.23:5000/keywordTwitterSearch/ps5/pt
+    #http://192.168.1.104:5000/keywordTwitterSearch/ps5/pt
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
     return jsonify(tweets)
 
-@app.route('/savePositiveNews/<news>/<user>', methods=['GET'])
+@app.route('/savePositiveNews/<newsNumbers>/<user>', methods=['GET'])
 def savePositiveNews(news, user):
-    #http://192.168.1.23:5000/savePositiveNews/5-6-7-8/tiagomsrs
+    #http://192.168.1.104:5000/savePositiveNews/5-6-7-8/tiagomsrs
+
+    numbers = news.split('-')
+    # TODO pegar a lista de palavras aqui e salvar no db
     return jsonify()
 
-@app.route('/saveNegativeNews/<news>/<user>', methods=['GET'])
+@app.route('/saveNegativeNews/<newsNumbers>/<user>', methods=['GET'])
 def saveNegativeNews(news, user):
-    #http://192.168.1.23:5000/saveNegativeNews/1-2-3-4/tiagomsrs
+    #http://192.168.1.104:5000/saveNegativeNews/1-2-3-4/tiagomsrs
+
     return jsonify()
+
+@app.route('/recoverLastUserNews/<user>', methods=['GET'])
+def recoverLastUserNews(user):
+    # http://192.168.1.104:5000/recoverLastUserNews/tiagomsrs
+    filename = user + "_tempNews.json"
+    data_folder = Path("database/")
+    file_to_open = data_folder / filename
+    with open(file_to_open) as json_file:
+        data = json.load(json_file)
+
+    return jsonify(data)
+
 
 if __name__ == "__main__":
-    IP = "10.20.41.126"
+    IP = "192.168.1.104"
     app.config['JSON_AS_ASCII'] = False
     app.run(debug=True, host=IP)
