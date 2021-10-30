@@ -97,17 +97,53 @@ def keywordTwitterSearch(keyword, language='en'):
     return jsonify(tweets)
 
 @app.route('/savePositiveNews/<newsNumbers>/<user>', methods=['GET'])
-def savePositiveNews(news, user):
+def savePositiveNews(newsNumbers, user):
     #http://192.168.1.104:5000/savePositiveNews/5-6-7-8/tiagomsrs
 
-    numbers = news.split('-')
+    numbers = newsNumbers.split('-')
+
+    filename = "users_db.json"
+    data_folder = Path("database/")
+    file_to_open = data_folder / filename
+
+    with open(file_to_open) as json_file:
+        user_db = json.load(json_file)
     # TODO pegar a lista de palavras aqui e salvar no db
+
+    userTemp = dict()
+
+    for profile in user_db['users']:
+        if (profile['id'] == user) :
+            userTemp = profile
+            break
+
+    clean_html(matrix[row][SUMMARY])
+    remove_punctuation(matrix[row][SUMMARY])
+    remove_stopwords(matrix[row][SUMMARY], language)
+    matrix[row][SUMMARY].lower()
+
     return jsonify()
 
 @app.route('/saveNegativeNews/<newsNumbers>/<user>', methods=['GET'])
-def saveNegativeNews(news, user):
+def saveNegativeNews(newsNumbers, user):
     #http://192.168.1.104:5000/saveNegativeNews/1-2-3-4/tiagomsrs
 
+    numbers = newsNumbers.split('-')
+
+    filename = "users_db.json"
+    data_folder = Path("database/")
+    file_to_open = data_folder / filename
+
+    with open(file_to_open) as json_file:
+        user_db = json.load(json_file)
+    # TODO pegar a lista de palavras aqui e salvar no db
+
+    userTemp = dict()
+
+    for profile in user_db['users']:
+        if (profile['id'] == user):
+            userTemp = profile
+            break
     return jsonify()
 
 @app.route('/recoverLastUserNews/<user>', methods=['GET'])

@@ -1,11 +1,19 @@
 {
-    "user": [
+    "users": [
         {
           "id": "default",
           "words": [
             {
-              "positiveWords": ["a", "b", "c"],
-              "negativeWords": ["d", "e", "f"]
+              "positiveWords": {
+                "a": 1,
+                "b": 2,
+                "c": 3
+              },
+              "negativeWords": {
+                "d": 1,
+                "e": 2,
+                "f": 1
+              }
             }
           ]
         },
@@ -13,8 +21,16 @@
           "id": "tiagomsrs",
           "words": [
             {
-              "positiveWords": ["technology", "brasil", "game"],
-              "negativeWords": ["lula", "juros", "inflação"]
+              "positiveWords": {
+                "technology": 2,
+                "brasil": 4,
+                "game": 2
+              },
+              "negativeWords": {
+                "lula": 2,
+                "juros": 1,
+                "inflação": 3
+              }
             }
           ]
         }
