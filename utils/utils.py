@@ -9,6 +9,7 @@ import concurrent.futures
 import tweepy
 import json
 
+
 from nltk.corpus import opinion_lexicon
 from newspaper import Article
 from datetime import date, datetime
@@ -17,8 +18,7 @@ from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
-from pymongo import MongoClient
-from pprint import pprint
+from pathlib import Path
 
 from tweepy import Stream
 nltk.download('punkt')
@@ -241,7 +241,7 @@ def remove_punctuation(text):
 
     return text
 
-def remove_stopwords(text, language):
+def remove_stopwords(text, language='en'):
     """
 
     :param text:
@@ -429,3 +429,57 @@ def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
     return tweets
 
 
+def cleantext(auxTitle):
+    auxTitle = clean_html(auxTitle)
+    auxTitle = remove_punctuation(auxTitle)
+    auxTitle = remove_stopwords(auxTitle)
+    auxTitle = auxTitle.lower()
+
+    words = [word for word in tokenizer.tokenize(auxTitle)]
+    return words
+
+
+def updateUsers_db(newsNumbers, user, category):
+    filename = user + "_tempNews.json"
+    data_folder = Path("database/")
+    userNews_db_file = data_folder / filename
+
+    with open(userNews_db_file) as json_file:
+        userNewsTemp = json.load(json_file)
+
+    retrievednews = []
+    numbers = newsNumbers.split('-')
+    for news in numbers:
+        try:
+            auxTitle = userNewsTemp[int(news)][1]
+            textCleaned = cleantext(auxTitle)
+            retrievednews.append(textCleaned)
+        except:
+            print("Error to append tokezined title words")
+
+    filename = "users_db.json"
+    data_folder = Path("database/")
+    user_db_file = data_folder / filename
+
+    with open(user_db_file) as json_file:
+        user_db = json.load(json_file)
+
+    userProfileLoadedTemp = dict()
+    for profile in user_db['users']:
+        if (profile['id'] == user):
+            userProfileLoadedTemp = profile
+            break
+
+    for news in retrievednews:
+        for word in news:
+            if word in userProfileLoadedTemp['words'][0][category]:
+                userProfileLoadedTemp['words'][0][category][word] += 1
+            else:
+                userProfileLoadedTemp['words'][0][category][word] = 1
+
+    user_dbDict = json.dumps(user_db)
+
+    with open(user_db_file, 'w') as f:
+        f.write(user_dbDict)
+
+    return None

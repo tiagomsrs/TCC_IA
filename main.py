@@ -6,7 +6,6 @@ from utils import utils
 from flask import Flask, render_template,jsonify
 from pathlib import Path
 
-
 app = Flask(__name__)
 PAGE_SIZE = 20
 
@@ -86,6 +85,7 @@ def searchNews(temas, language='en', user='tiagomsrs'):
 @app.route('/searchTrendsTwitter/<woeid>')
 def searchTrendsTwitter(woeid):
     # http://192.168.1.104:5000/searchTrendsTwitter/brazil
+    woeid = str(woeid).lower()
     top20TwitterTrends = utils.twitterTrendCollection(WOIED[woeid])
     return jsonify(top20TwitterTrends)
 
@@ -96,55 +96,25 @@ def keywordTwitterSearch(keyword, language='en'):
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
     return jsonify(tweets)
 
+
 @app.route('/savePositiveNews/<newsNumbers>/<user>', methods=['GET'])
 def savePositiveNews(newsNumbers, user):
     #http://192.168.1.104:5000/savePositiveNews/5-6-7-8/tiagomsrs
 
-    numbers = newsNumbers.split('-')
+    category = 'positiveWords'
+    utils.updateUsers_db(newsNumbers, user, category)
 
-    filename = "users_db.json"
-    data_folder = Path("database/")
-    file_to_open = data_folder / filename
-
-    with open(file_to_open) as json_file:
-        user_db = json.load(json_file)
-    # TODO pegar a lista de palavras aqui e salvar no db
-
-    userTemp = dict()
-
-    for profile in user_db['users']:
-        if (profile['id'] == user) :
-            userTemp = profile
-            break
-
-    clean_html(matrix[row][SUMMARY])
-    remove_punctuation(matrix[row][SUMMARY])
-    remove_stopwords(matrix[row][SUMMARY], language)
-    matrix[row][SUMMARY].lower()
-
-    return jsonify()
+    return "Database updated with positive words!"
 
 @app.route('/saveNegativeNews/<newsNumbers>/<user>', methods=['GET'])
 def saveNegativeNews(newsNumbers, user):
-    #http://192.168.1.104:5000/saveNegativeNews/1-2-3-4/tiagomsrs
+    #http://192.168.1.104:5000/saveNegativeNews/2-13/tiagomsrs
 
-    numbers = newsNumbers.split('-')
+    category = 'negativeWords'
+    utils.updateUsers_db(newsNumbers, user, category)
 
-    filename = "users_db.json"
-    data_folder = Path("database/")
-    file_to_open = data_folder / filename
+    return "Database updated with negative words!"
 
-    with open(file_to_open) as json_file:
-        user_db = json.load(json_file)
-    # TODO pegar a lista de palavras aqui e salvar no db
-
-    userTemp = dict()
-
-    for profile in user_db['users']:
-        if (profile['id'] == user):
-            userTemp = profile
-            break
-    return jsonify()
 
 @app.route('/recoverLastUserNews/<user>', methods=['GET'])
 def recoverLastUserNews(user):
