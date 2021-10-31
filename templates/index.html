@@ -2,28 +2,40 @@
 <html>
 <body>
     <h1 style="text-align: center;"><span style="color:#0000CD;">Op&ccedil;&otilde;es do sistema</span></h1>
-    <input type="text" id="language" name="language" value="en">
 
-    <h2>Buscar Not&iacute;cias:</h2>
+    <h3><strong>Usu&aacute;rio:<input name="usuario" id="usuario" type="text" value="tiagomsrs"/></strong></h3>
+    <h3><strong>Idioma:   <input name="language" id ="language" type="text" value="en"/></strong></h3>
+
+    <h3>Buscar Not&iacute;cias:</h3>
         <input type="text" id="searchNewsText" name="searchNewsText" class="form-control">
         <button type="submit" id="btnSearchNews" onclick="searchNews()" >Search</button>
 
-    <h2>Buscar Trending Topics por Pa&iacute;s:</h2>
+    <h3>Buscar Trending Topics por Pa&iacute;s:</h3>
         <input type="text" id="trendingTopicSearchText" name="trendingTopicSearchText" class="form-control">
         <button type="submit" id="btnTrendingTopics" onclick="trendingTopics()">Search</button>
 
-    <h2>Buscar Tweets com palavra-chave:</h2>
+    <h3>Buscar Tweets com palavra-chave:</h3>
         <input type="text" id="searchTweetKeywordText" name="searchTweetKeywordText" class="form-control">
         <button type="submit" id="btnSearchTweetKeyword" onclick="tweetKeyword()">Search</button>
+
+    <h3><span style="color:#00FA9A;">Link not&iacute;cia positiva:</span></h3>
+        <input type="text" id="inputPositiveNews" name="inputPositiveNews" class="form-control">
+        <button type="submit" id="btnPositiveNews" onclick="savePositiveNews()" >Save</button>
+
+    <h3><span style="color:#B22222;">Link not&iacute;cia negativa:</span></h3>
+        <input type="text" id="inputNegativeNews" name="inputNegativeNews" class="form-control">
+        <button type="submit" id="btnNegativeNews" onclick="saveNegativeNews()" >Save</button>
+
 </body>
 </html>
 <script>
 function searchNews() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://192.168.1.23:5000/searchNews/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/searchNews/';
     var searchNewsText = document.getElementById("searchNewsText").value;
     var language = document.getElementById("language").value;
-    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
+    var usuario = document.getElementById("usuario").value;
+    var url = searchNewsBaseRoute.concat(searchNewsText, '/',language,'/',usuario);
     window.open(url).focus();
 }
 </script>
@@ -31,7 +43,7 @@ function searchNews() {
 <script>
 function trendingTopics() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://192.168.1.23:5000/searchTrendsTwitter/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/searchTrendsTwitter/';
     var searchNewsText = document.getElementById("trendingTopicSearchText").value;
     var url = searchNewsBaseRoute.concat(searchNewsText);
     window.open(url).focus();
@@ -41,10 +53,32 @@ function trendingTopics() {
 <script>
 function tweetKeyword() {
     var oReq = new XMLHttpRequest();
-    var searchNewsBaseRoute = 'http://192.168.1.23:5000/keywordTwitterSearch/';
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/keywordTwitterSearch/';
     var searchNewsText = document.getElementById("searchTweetKeywordText").value;
     var language = document.getElementById("language").value;
     var url = searchNewsBaseRoute.concat(searchNewsText, '/',language);
+    window.open(url).focus();
+}
+</script>
+
+<script>
+function savePositiveNews() {
+    var oReq = new XMLHttpRequest();
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/savePositiveNews/';
+    var positiveNews = document.getElementById("inputPositiveNews").value;
+    var usuario = document.getElementById("usuario").value;
+    var url = searchNewsBaseRoute.concat(positiveNews, '/',usuario);
+    window.open(url).focus();
+}
+</script>
+
+<script>
+function saveNegativeNews() {
+    var oReq = new XMLHttpRequest();
+    var searchNewsBaseRoute = 'http://192.168.1.104:5000/saveNegativeNews/';
+    var negativeNews = document.getElementById("inputNegativeNews").value;
+    var usuario = document.getElementById("usuario").value;
+    var url = searchNewsBaseRoute.concat(negativeNews, '/',usuario);
     window.open(url).focus();
 }
 </script>
