@@ -132,3 +132,5 @@ if __name__ == "__main__":
     IP = "192.168.1.104"
     app.config['JSON_AS_ASCII'] = False
     app.run(debug=True, host=IP)
+    # git tag -a v1.4 -m "my version 1.4"
+    # git push origin v1.4
