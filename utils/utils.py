@@ -470,15 +470,29 @@ def updateUsers_db(newsNumbers, user, category):
             userProfileLoadedTemp = profile
             break
 
-    for news in retrievednews:
-        for word in news:
-            if word in userProfileLoadedTemp['words'][0][category]:
-                userProfileLoadedTemp['words'][0][category][word] += 1
-            else:
-                userProfileLoadedTemp['words'][0][category][word] = 1
+    if len(userProfileLoadedTemp) < 2:
+        newprofile = dict()
+        newprofile['id'] = user
+        newprofile['words'] = [dict()]
+        newprofile['words'][0] = {"positiveWords": {}, "negativeWords": {}}
+
+        for news in retrievednews:
+            for word in news:
+                if word in newprofile['words'][0][category]:
+                    newprofile['words'][0][category][word] += 1
+                else:
+                    newprofile['words'][0][category][word] = 1
+        user_db['users'].append(newprofile)
+
+    else:
+        for news in retrievednews:
+            for word in news:
+                if word in userProfileLoadedTemp['words'][0][category]:
+                    userProfileLoadedTemp['words'][0][category][word] += 1
+                else:
+                    userProfileLoadedTemp['words'][0][category][word] = 1
 
     user_dbDict = json.dumps(user_db)
-
     with open(user_db_file, 'w') as f:
         f.write(user_dbDict)
 
