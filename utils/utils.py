@@ -8,8 +8,6 @@ import string
 import concurrent.futures
 import tweepy
 import json
-
-
 from nltk.corpus import opinion_lexicon
 from newspaper import Article
 from datetime import date, datetime
@@ -19,6 +17,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
 from pathlib import Path
+from nltk.stem import PorterStemmer
 
 from tweepy import Stream
 nltk.download('punkt')
@@ -434,6 +433,7 @@ def cleantext(auxTitle):
     auxTitle = remove_punctuation(auxTitle)
     auxTitle = remove_stopwords(auxTitle)
     auxTitle = auxTitle.lower()
+    nltk.stem
 
     words = [word for word in tokenizer.tokenize(auxTitle)]
     return words
