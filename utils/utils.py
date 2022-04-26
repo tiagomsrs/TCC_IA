@@ -120,16 +120,13 @@ def extractorGoogleApi(googleInput):
 
     :return: [title   date    link]
     """
-    TITLE = 0
-    DATE = 3
-    LINK = 5
 
     dfTemp = list()
 
     for index in range(len(googleInput)):
-        aux = [googleInput.values[index][TITLE],
-               googleInput.values[index][DATE],
-               googleInput.values[index][LINK]]
+        aux = [googleInput[index]['title'],
+               googleInput[index]['date'],
+               googleInput[index]['link']]
         dfTemp.append(aux)
 
     return dfTemp.copy()
@@ -153,24 +150,25 @@ def extractorNewsApi(newsInput):
 
     return dfTemp.copy()
 
-def youtubeRemoval(matrix):
+def sitesRemoval(matrix):
     """
 
     :param matrix: Matrix with containing, title, date and links
     :return: matrix without news from Youtube
     """
     YOUTUBE = r"www.youtube.com"
+    SLASHDOT = r"slashdot.org"
     outputMatrix = []
 
     for row in range(len(matrix)):
-        if re.search(YOUTUBE, matrix[row][2]):
+        if re.search(YOUTUBE, matrix[row][2]) or re.search(SLASHDOT, matrix[row][2]):
             continue
         else:
             outputMatrix.append(matrix[row][:])
 
     return outputMatrix[:]
 
-def summaryDownload(matrix):
+def summaryDownload(matrix, page_size, temas):
     """
     :param matrix: Complete matrix to download the content
     :return:
@@ -188,9 +186,15 @@ def summaryDownload(matrix):
         except Exception as exc:
             print("Failed to download the summary")
 
+    completeMatrixOutput = []
+    for row in range(len(completeMatrix)):
+        if not re.search(temas.strip().lower(), str(completeMatrix[row][1]).lower()):
+            continue
+        else:
+            completeMatrixOutput.append(completeMatrix[row][:])
 
-    print("It was possible to download {0} news .".format(len(completeMatrix)))
-    return completeMatrix[:]
+    print("It was possible to download {0} news .".format(len(completeMatrixOutput)))
+    return completeMatrixOutput[:int(page_size)]
 
 def summary_download_data(matrix, completeMatrix, row):
     """

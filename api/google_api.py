@@ -14,15 +14,13 @@ def GoogleApi (temas, lang):
 
     [actualDate, previusDate] = utils.dateFormatGoogleApi()
 
-    googlenews = GoogleNews(lang=lang, start=previusDate ,end=actualDate)
-    # goooglenews = GoogleNews(period='d')
-    googlenews.set_lang('en')
+    googlenews = GoogleNews(lang=lang, period='30d', encode='utf-8')
+
     googlenews.search(temas)
+    result = googlenews.results(sort=True)
+    googlenews.get_page(2)
 
-    result = googlenews.result()
-    df = pd.DataFrame(result)
-
-    return df
+    return result
 
 
 

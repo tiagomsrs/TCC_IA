@@ -15,6 +15,10 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from utils import utils
+import requests as req
+import json
+
+PAGE_SIZE = 20
 
 
 def top_headlines():
@@ -138,40 +142,25 @@ def wordcld(dictionary):
             print("Wordcloud Not applicable")
 
 
-def NewsApi (tema, language, page_size):
+def NewsApi (tema, language, page_size = PAGE_SIZE):
 
     api_key = 'a7503f924ba94bf8874a440cc9d74fcb'
     newsapi = NewsApiClient(api_key=api_key)
-    # data = newsapi.get_everything(q=tema, language='pt', page_size=20)
-
-    # print(data['totalResults'])
-    # print(data.keys())
-    # print(data['status'])
-
-    # articles = data['articles']
-    #
-    # for x,y in enumerate(articles):
-    #     print('{0}  {1}'.format(x, y["title"]))
-    #
-    #
-    # for key, value in articles[0].items():
-    #     print("\n{0} {1}".format(key.ljust(15), value))
-    #     #print(f"\n{key.ljust(15)} {value}")
-    #
-    # pub_data = dt.datetime.strptime(articles[0]['publishedAt'],"%Y-%m-%dT%H:%M:%SZ").date()
-    # print(pub_data)
-    #
-    # df = pd.DataFrame(articles)
-
-
-    ######### melhorar as buscas e evitar o estouro
 
     to = utils.datetime.today()
     to = str(to).split(' ')[0]
-    data = newsapi.get_everything(q=tema[0], language=language, from_param=utils.dateFormatNewsApi(), to=to, sort_by='publishedAt', page_size=20)
 
-    # data = newsapi.get_everything(q=tema[0], from_param='2021-08-20')
-    # print(data['totalResults'])
-    #%Y-%m-%d
-    return data
+    URL = 'https://newsapi.org/v2/everything?'
+    q = 'q=' + tema + '&'
+    searchIn = 'searchIn=title' + '&'
+    language = 'language='+language + '&'
+    data = 'sortBy=publishedAt' + '&'
+    pageSize = 'pageSize=' + str(int(page_size)*2) + '&'
+    apiKey = 'apiKey=' + api_key
+    link = URL + q + searchIn + language + data + pageSize + apiKey
+    resp = req.get(link)
 
+    if resp.status_code == 200:
+        return json.loads(resp.text)["articles"]
+    else:
+        return ""
