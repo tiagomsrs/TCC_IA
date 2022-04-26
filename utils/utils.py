@@ -8,8 +8,6 @@ import string
 import concurrent.futures
 import tweepy
 import json
-
-
 from nltk.corpus import opinion_lexicon
 from newspaper import Article
 from datetime import date, datetime
@@ -19,6 +17,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import treebank
 from wordcloud import WordCloud
 from pathlib import Path
+from nltk.stem import PorterStemmer
 
 from tweepy import Stream
 nltk.download('punkt')
@@ -121,16 +120,13 @@ def extractorGoogleApi(googleInput):
 
     :return: [title   date    link]
     """
-    TITLE = 0
-    DATE = 3
-    LINK = 5
 
     dfTemp = list()
 
     for index in range(len(googleInput)):
-        aux = [googleInput.values[index][TITLE],
-               googleInput.values[index][DATE],
-               googleInput.values[index][LINK]]
+        aux = [googleInput[index]['title'],
+               googleInput[index]['date'],
+               googleInput[index]['link']]
         dfTemp.append(aux)
 
     return dfTemp.copy()
@@ -154,24 +150,25 @@ def extractorNewsApi(newsInput):
 
     return dfTemp.copy()
 
-def youtubeRemoval(matrix):
+def sitesRemoval(matrix):
     """
 
     :param matrix: Matrix with containing, title, date and links
     :return: matrix without news from Youtube
     """
     YOUTUBE = r"www.youtube.com"
+    SLASHDOT = r"slashdot.org"
     outputMatrix = []
 
     for row in range(len(matrix)):
-        if re.search(YOUTUBE, matrix[row][2]):
+        if re.search(YOUTUBE, matrix[row][2]) or re.search(SLASHDOT, matrix[row][2]):
             continue
         else:
             outputMatrix.append(matrix[row][:])
 
     return outputMatrix[:]
 
-def summaryDownload(matrix):
+def summaryDownload(matrix, page_size, temas):
     """
     :param matrix: Complete matrix to download the content
     :return:
@@ -189,9 +186,15 @@ def summaryDownload(matrix):
         except Exception as exc:
             print("Failed to download the summary")
 
+    completeMatrixOutput = []
+    for row in range(len(completeMatrix)):
+        if not re.search(temas.strip().lower(), str(completeMatrix[row][1]).lower()):
+            continue
+        else:
+            completeMatrixOutput.append(completeMatrix[row][:])
 
-    print("It was possible to download {0} news .".format(len(completeMatrix)))
-    return completeMatrix[:]
+    print("It was possible to download {0} news .".format(len(completeMatrixOutput)))
+    return completeMatrixOutput[:int(page_size)]
 
 def summary_download_data(matrix, completeMatrix, row):
     """
@@ -434,6 +437,7 @@ def cleantext(auxTitle):
     auxTitle = remove_punctuation(auxTitle)
     auxTitle = remove_stopwords(auxTitle)
     auxTitle = auxTitle.lower()
+    nltk.stem
 
     words = [word for word in tokenizer.tokenize(auxTitle)]
     return words
@@ -470,15 +474,29 @@ def updateUsers_db(newsNumbers, user, category):
             userProfileLoadedTemp = profile
             break
 
-    for news in retrievednews:
-        for word in news:
-            if word in userProfileLoadedTemp['words'][0][category]:
-                userProfileLoadedTemp['words'][0][category][word] += 1
-            else:
-                userProfileLoadedTemp['words'][0][category][word] = 1
+    if len(userProfileLoadedTemp) < 2:
+        newprofile = dict()
+        newprofile['id'] = user
+        newprofile['words'] = [dict()]
+        newprofile['words'][0] = {"positiveWords": {}, "negativeWords": {}}
+
+        for news in retrievednews:
+            for word in news:
+                if word in newprofile['words'][0][category]:
+                    newprofile['words'][0][category][word] += 1
+                else:
+                    newprofile['words'][0][category][word] = 1
+        user_db['users'].append(newprofile)
+
+    else:
+        for news in retrievednews:
+            for word in news:
+                if word in userProfileLoadedTemp['words'][0][category]:
+                    userProfileLoadedTemp['words'][0][category][word] += 1
+                else:
+                    userProfileLoadedTemp['words'][0][category][word] = 1
 
     user_dbDict = json.dumps(user_db)
-
     with open(user_db_file, 'w') as f:
         f.write(user_dbDict)
 
