@@ -18,6 +18,9 @@ from nltk.tokenize import treebank
 from wordcloud import WordCloud
 from pathlib import Path
 from nltk.stem import PorterStemmer
+import snowballstemmer
+import requests as req
+import subprocess
 
 from tweepy import Stream
 nltk.download('punkt')
@@ -168,7 +171,7 @@ def sitesRemoval(matrix):
 
     return outputMatrix[:]
 
-def summaryDownload(matrix, page_size, temas):
+def summaryDownload(matrix, page_size, temas, language='en'):
     """
     :param matrix: Complete matrix to download the content
     :return:
@@ -187,8 +190,15 @@ def summaryDownload(matrix, page_size, temas):
             print("Failed to download the summary")
 
     completeMatrixOutput = []
+
+
+
     for row in range(len(completeMatrix)):
-        if not re.search(temas.strip().lower(), str(completeMatrix[row][1]).lower()):
+        text = remove_punctuation(str(completeMatrix[row][1].lower()))
+        text = remove_stopwords(text, language)
+        temas = remove_punctuation(temas.strip().lower())
+        temas = remove_stopwords(temas, language)
+        if not re.search(temas, text):
             continue
         else:
             completeMatrixOutput.append(completeMatrix[row][:])
@@ -284,6 +294,32 @@ def majorityCheck(array):
     else:
         return "neutral"
 
+def applyStemming(text, language):
+
+    if language == 'pt':
+        stemmer = snowballstemmer.stemmer('portuguese')
+    elif language == 'en':
+        stemmer = snowballstemmer.stemmer('english')
+
+    textStem = stemmer.stemWords(text.split())
+    return " ".join(textStem)
+
+def convertToEnglish(text):
+
+    text = str(text)
+    text = text.replace("\""," ").replace("“", " ").replace("”", " ").replace("\n", " ")
+    command = "curl -X POST -u \"apikey:g-uQG9zbH3j48WJwIlXMJXLWkzwE49bmulwFNrmqLGMu\" --header \"Content-Type: application/json\""
+    command = command + " --data \"{"
+    command = command + "\\\"text\\\": [\\\"{}\\\"], \\\"model_id\\\":\\\"pt-en\\\"".format(str(text)) + "}\""
+    command = command + " \"https://api.au-syd.language-translator.watson.cloud.ibm.com/instances/ca766625-6d33-4457-80db-db8b5fe4f2da/v3/translate?version=2018-05-01\""
+
+    subprocess1 = subprocess.Popen(command,
+                                    shell=True, stdout=subprocess.PIPE)
+    subprocess_return = subprocess1.stdout.read()
+    string1 = subprocess_return.decode("utf-8")
+    textConverted = json.loads(string1)['translations'][0]['translation']
+    return textConverted
+
 def sentimentalAnalyzes(matrix, language):
     """
     :param language: language used on entire project
@@ -300,11 +336,19 @@ def sentimentalAnalyzes(matrix, language):
     for row in range(len(matrix)):
         matrix[row][SUMMARY] = clean_html(matrix[row][SUMMARY])
         matrix[row][SUMMARY] = remove_punctuation(matrix[row][SUMMARY])
-        matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
         matrix[row][SUMMARY] = matrix[row][SUMMARY].lower()
 
-
     plotWordCloud(matrix, language, "trendwordcloud.png")
+
+    if language == 'pt':
+        for row in range(len(matrix)):
+            matrix[row][SUMMARY] = convertToEnglish(matrix[row][SUMMARY])
+            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], 'en')
+            matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
+    else:
+        for row in range(len(matrix)):
+            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], 'en')
+            matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
 
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
     neg_list_opinion_lexicon = set(opinion_lexicon.negative())
