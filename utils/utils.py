@@ -29,6 +29,7 @@ nltk.download('stopwords')
 
 stopwordsEnglish = stopwords.words('english')
 stopwordsPortuguese = stopwords.words('portuguese')
+stopwordsSpanish = stopwords.words('spanish')
 tokenizer = treebank.TreebankWordTokenizer()
 
 TWITTER_CONSUMER_KEY = "ktAHnlHevDnBaQiF46RNJd9yy"
@@ -286,13 +287,37 @@ def majorityCheck(array):
     max_index = arrayCount.index(max(arrayCount))
 
     if max_index == 0:
-        return "negative"
+        if arrayCount[max_index] == 3:
+            return "100% negative."
+        elif arrayCount[max_index] == 2:
+            if arrayCount[1] == 1:
+                return "2/3 negative and 1/3 neutral."
+            elif arrayCount[2] == 1:
+                return "2/3 negative and 1/3 positive."
+        else:
+            return "Neutral"
     elif max_index == 1:
-        return "neutral"
+        if arrayCount[max_index] == 3:
+            return "100% neutral."
+        elif arrayCount[max_index] == 2:
+            if arrayCount[0] == 1:
+                return "2/3 neutral and 1/3 negative."
+            elif arrayCount[2] == 1:
+                return "2/3 neutral and 1/3 positive."
+        else:
+            return "Neutral"
     elif max_index == 2:
-        return "positive"
+        if arrayCount[max_index] == 3:
+            return "100% positive."
+        elif arrayCount[max_index] == 2:
+            if arrayCount[0] == 1:
+                return "2/3 positive and 1/3 negative."
+            elif arrayCount[1] == 1:
+                return "2/3 positive and 1/3 neutral."
+        else:
+            return "Neutral"
     else:
-        return "neutral"
+        return "Neutral"
 
 def applyStemming(text, language):
 
@@ -341,14 +366,15 @@ def sentimentalAnalyzes(matrix, language):
     plotWordCloud(matrix, language, "trendwordcloud.png")
 
     if language == 'pt':
+        print("Arrive {} news to translate. ".format(len(matrix)))
         for row in range(len(matrix)):
             matrix[row][SUMMARY] = convertToEnglish(matrix[row][SUMMARY])
-            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], 'en')
-            matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
+            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
+            # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
     else:
         for row in range(len(matrix)):
-            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], 'en')
-            matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
+            matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
+            # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
 
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
     neg_list_opinion_lexicon = set(opinion_lexicon.negative())
@@ -417,6 +443,8 @@ def plotWordCloud(matrix, language,name):
         wc = WordCloud(width=800, height=400, max_words=200, stopwords=stopwordsPortuguese)
     elif language == 'en':
         wc = WordCloud(width=800, height=400, max_words=200, stopwords=stopwordsEnglish)
+    elif language == 'es':
+        wc = WordCloud(width=800, height=400, max_words=200, stopwords=stopwordsSpanish)
 
     corpus = ""
     for row in range(len(matrix)):
@@ -471,7 +499,7 @@ def collectTweetBasedOnPreferenceAndAnalyze(keyword, language):
         tweets[row][ANALYZEDTEXT] = remove_stopwords(tweets[row][ANALYZEDTEXT], language)
         tweets[row][ANALYZEDTEXT] = tweets[row][ANALYZEDTEXT].lower()
 
-    plotWordCloud(tweets, language,"twiter.png")
+    plotWordCloud(tweets, language,"twitter.png")
 
     return tweets
 

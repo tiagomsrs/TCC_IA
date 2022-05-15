@@ -1,4 +1,4 @@
-# import webbrowser
+import webbrowser
 import time, json, os
 from api import google_api
 from api import news_api
@@ -39,22 +39,22 @@ def searchNews(temas, language='en', user='tiagomsrs', page_size=20):
         print("Failed to get the news from Google Api")
     news_1 = utils.extractorGoogleApi(googleOutput)
 
-    # temas_formatted = temas.strip().replace(" ","%20")
-    # newsOutput = news_api.NewsApi(temas_formatted, language, page_size)
-    # if newsOutput == "":
-    #     print("Failed to get the news from News Api.")
-    #     return ""
-    #
-    # news_2 = utils.extractorNewsApi(newsOutput)
-    #
-    # fim = time.time()
-    # print("Time spend to search Google e News API:" + str(fim - inicio))
-    #
-    if  news_1:
-        newsMatrix = utils.sitesRemoval(news_1)
+    temas_formatted = temas.strip().replace(" ","%20")
+    newsOutput = news_api.NewsApi(temas_formatted, language, page_size)
+    if newsOutput == "":
+        print("Failed to get the news from News Api.")
+        return ""
+
+    news_2 = utils.extractorNewsApi(newsOutput)
+
+    fim = time.time()
+    print("Time spend to search Google e News API:" + str(fim - inicio))
+
+    if news_1 and news_2:
+        newsMatrix = utils.sitesRemoval(news_1 + news_2)
 
         inicio = time.time()
-        completeMatrix = utils.summaryDownload(newsMatrix, page_size, temas)
+        completeMatrix = utils.summaryDownload(newsMatrix, page_size, temas, language)
         fim = time.time()
         print("Time spend to download the news summary: " + str(fim - inicio))
 
@@ -63,6 +63,8 @@ def searchNews(temas, language='en', user='tiagomsrs', page_size=20):
         fim = time.time()
 
         print("Time spend to format the news: " + str(fim - inicio))
+
+    webbrowser.open('trendwordcloud.png')
 
     filename = user + "_tempNews.json"
     data_folder = Path("database/")
@@ -86,7 +88,9 @@ def searchTrendsTwitter(woeid):
 @app.route('/keywordTwitterSearch/<keyword>/<language>', methods=['GET'])
 def keywordTwitterSearch(keyword, language='en'):
     #http://192.168.1.104:5000/keywordTwitterSearch/ps5/pt
+    # keyword_formatted = keyword.strip().replace(" ", "%20")
     tweets = utils.collectTweetBasedOnPreferenceAndAnalyze(keyword, language)
+    webbrowser.open('twitter.png')
     return jsonify(tweets)
 
 
