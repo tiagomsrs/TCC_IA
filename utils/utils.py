@@ -345,6 +345,23 @@ def convertToEnglish(text):
     textConverted = json.loads(string1)['translations'][0]['translation']
     return textConverted
 
+
+def saveToTrainData(text):
+    filename = "test_news.json"
+    data_folder = Path("database/")
+    testNews_db_file = data_folder / filename
+
+    with open(testNews_db_file) as json_file:
+        testTemp = json.load(json_file)
+
+    sizeTestTemp = len(testTemp)
+    testTemp[sizeTestTemp] = [text, 99]
+
+    testTempJson = json.dumps(testTemp)
+    with open(testNews_db_file, 'w') as f:
+        f.write(testTempJson)
+
+
 def sentimentalAnalyzes(matrix, language):
     """
     :param language: language used on entire project
@@ -371,11 +388,14 @@ def sentimentalAnalyzes(matrix, language):
             matrix[row][SUMMARY] = convertToEnglish(matrix[row][SUMMARY])
             matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
             # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
+            saveToTrainData(matrix[row][SUMMARY])
     else:
         for row in range(len(matrix)):
             matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
             # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
+            saveToTrainData(matrix[row][SUMMARY])
 
+    # database = json.loads(open('database/users_db.json'))
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
     neg_list_opinion_lexicon = set(opinion_lexicon.negative())
     sentimentalCounterOpinionLexicon = list()
