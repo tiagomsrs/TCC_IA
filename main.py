@@ -50,7 +50,7 @@ def searchNews(temas, language='en', user='tiagomsrs', page_size=20):
     fim = time.time()
     print("Time spend to search Google e News API:" + str(fim - inicio))
 
-    if news_1 and news_2:
+    if news_1 or news_2:
         newsMatrix = utils.sitesRemoval(news_1 + news_2)
 
         inicio = time.time()
