@@ -362,7 +362,7 @@ def saveToTrainData(text):
         f.write(testTempJson)
 
 
-def sentimentalAnalyzes(matrix, language):
+def sentimentalAnalyzes(matrix, language, user):
     """
     :param language: language used on entire project
     :param matrix: in the form of:
@@ -382,18 +382,52 @@ def sentimentalAnalyzes(matrix, language):
 
     plotWordCloud(matrix, language, "trendwordcloud.png")
 
+    filename = "users_db.json"
+    data_folder = Path("database/")
+    user_db_file = data_folder / filename
+
+    with open(user_db_file) as json_file:
+        user_db = json.load(json_file)
+
+    userProfileLoadedTemp = dict()
+    for profile in user_db['users']:
+        if (profile['id'] == user):
+            userProfileLoadedTemp = profile
+            break
+    userProfileLoadedTempPositive = userProfileLoadedTemp['words'][0]['positiveWords']
+    userProfileLoadedTempNegative = userProfileLoadedTemp['words'][0]['negativeWords']
+
+    order = dict()
     if language == 'pt':
         print("Arrive {} news to translate. ".format(len(matrix)))
         for row in range(len(matrix)):
             matrix[row][SUMMARY] = convertToEnglish(matrix[row][SUMMARY])
             matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
+            keys = matrix[row][SUMMARY].split()
+            balance = 0
+            for key in keys:
+                if key in userProfileLoadedTempPositive.keys():
+                    balance += userProfileLoadedTempPositive[key]
+
+                if key in userProfileLoadedTempNegative.keys():
+                    balance -= userProfileLoadedTempNegative[key]
+                order[row] = balance
             # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
-            saveToTrainData(matrix[row][SUMMARY])
+            # saveToTrainData(matrix[row][SUMMARY])
     else:
         for row in range(len(matrix)):
             matrix[row][SUMMARY] = remove_stopwords(matrix[row][SUMMARY], language)
+            keys = matrix[row][SUMMARY].split()
+            balance = 0
+            for key in keys:
+                if key in userProfileLoadedTempPositive.keys():
+                    balance += userProfileLoadedTempPositive[key]
+
+                if key in userProfileLoadedTempNegative.keys():
+                    balance -= userProfileLoadedTempNegative[key]
+                order[row] = balance
             # matrix[row][SUMMARY] = applyStemming(matrix[row][SUMMARY], language)
-            saveToTrainData(matrix[row][SUMMARY])
+            # saveToTrainData(matrix[row][SUMMARY])
 
     # database = json.loads(open('database/users_db.json'))
     pos_list_opinion_lexicon = set(opinion_lexicon.positive())
@@ -429,7 +463,7 @@ def sentimentalAnalyzes(matrix, language):
         array = [row, matrix[row][0][0], matrix[row][0][2], arraySentimentalAnalyzed[row]]
         result.append(array)
 
-    return result
+    return result, order
 
 def sentimentCount(sentence, pos_list, neg_list):
     """
