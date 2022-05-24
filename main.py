@@ -59,7 +59,7 @@ def searchNews(temas, language='en', user='tiagomsrs', page_size=20):
         print("Time spend to download the news summary: " + str(fim - inicio))
 
         inicio = time.time()
-        arraySentimentalAnalyzed = utils.sentimentalAnalyzes(completeMatrix.copy(), language)
+        arraySentimentalAnalyzed, order = utils.sentimentalAnalyzes(completeMatrix.copy(), language, user)
         fim = time.time()
 
         print("Time spend to format the news: " + str(fim - inicio))
@@ -74,8 +74,14 @@ def searchNews(temas, language='en', user='tiagomsrs', page_size=20):
     with open(file_to_open, 'w') as f:
         f.write(arraySentimentalAnalyzedDict)
 
-    return jsonify(arraySentimentalAnalyzed)
+    orderSorted = sorted(order.items(), key=lambda x: x[1], reverse=True)
+    finalArray = list()
+    for line in orderSorted:
+        finalArray.append(arraySentimentalAnalyzed[line[0]])
 
+    for line in range(len(finalArray)):
+        finalArray[line][0] = str("Arrived at position {} and reordered to {}".format(finalArray[line][0], line))
+    return jsonify(finalArray)
 
 @app.route('/searchTrendsTwitter/<woeid>')
 def searchTrendsTwitter(woeid):
